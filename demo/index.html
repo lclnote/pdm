@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDM - Project Development Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;color:#333}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* Header */
+.header{background:#1a237e;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.header .logo{font-size:20px;font-weight:700;letter-spacing:1px}
+.header .logo span{color:#5c6bc0}
+.header .nav{display:flex;align-items:center;gap:16px}
+.header .nav a{color:#c5cae9;text-decoration:none;font-size:13px;padding:4px 10px;border-radius:4px;transition:background .2s}
+.header .nav a:hover{background:rgba(255,255,255,.1);color:#fff}
+.header .user{display:flex;align-items:center;gap:8px;font-size:13px;color:#c5cae9;cursor:pointer}
+
+/* Common */
+.container{max-width:1200px;margin:0 auto;padding:24px;width:100%}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;margin-bottom:16px}
+.card-title{font-size:16px;font-weight:600;margin-bottom:12px;color:#1a237e}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:6px;font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary{background:#1a237e;color:#fff}
+.btn-primary:hover{background:#283593}
+.btn-success{background:#2e7d32;color:#fff}
+.btn-success:hover{background:#388e3c}
+.btn-danger{background:#c62828;color:#fff}
+.btn-warning{background:#e65100;color:#fff}
+.btn-outline{background:transparent;border:1px solid #ddd;color:#666}
+.btn-outline:hover{border-color:#1a237e;color:#1a237e}
+.btn-sm{padding:4px 10px;font-size:12px}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:#888;margin-bottom:16px}
+.breadcrumb a{color:#1a237e;text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-active{background:#e8f5e9;color:#2e7d32}
+.badge-closed{background:#f5f5f5;color:#888}
+.badge-warning{background:#fff3e0;color:#e65100}
+.badge-danger{background:#ffebee;color:#c62828}
+.text-right{text-align:right}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.mb-8{margin-bottom:8px}
+.mb-16{margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;font-size:13px;border-bottom:1px solid #eee}
+th{color:#888;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+tr:hover{background:#f8f9ff}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:#e8eaf6;color:#1a237e;margin:2px}
+.progress-bar{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width .5s}
+.progress-bar .fill.green{background:#2e7d32}
+.progress-bar .fill.orange{background:#e65100}
+.progress-bar .fill.blue{background:#1a237e}
+
+/* Login */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1a237e,#3949ab)}
+.login-box{background:#fff;padding:40px;border-radius:12px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-box h1{text-align:center;margin-bottom:4px;font-size:24px;color:#1a237e}
+.login-box .subtitle{text-align:center;color:#888;font-size:13px;margin-bottom:28px}
+.login-box input{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:14px;transition:border .2s}
+.login-box input:focus{border-color:#1a237e;outline:none}
+.login-box .btn{width:100%;padding:12px;font-size:15px;justify-content:center}
+
+/* Phase cards */
+.phase-card{padding:16px;border-radius:8px;border:1px solid #e0e0e0;cursor:pointer;transition:all .2s}
+.phase-card:hover{border-color:#1a237e;box-shadow:0 2px 8px rgba(26,35,126,.12)}
+.phase-card .name{font-weight:600;margin-bottom:4px}
+.phase-card .status{font-size:12px;margin-bottom:8px}
+
+/* Task tree */
+.task-tree{font-size:13px}
+.task-tree .item{padding:6px 8px;cursor:pointer;border-radius:4px;display:flex;align-items:center;gap:6px}
+.task-tree .item:hover{background:#e8eaf6}
+.task-tree .item .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.task-tree .item.level-1{padding-left:16px}
+.task-tree .item.level-2{padding-left:32px}
+.task-tree .item.level-3{padding-left:48px}
+.task-tree .item.selected{background:#c5cae9}
+.status-dot.gray{background:#bdbdbd}
+.status-dot.blue{background:#1a237e}
+.status-dot.orange{background:#e65100}
+.status-dot.green{background:#2e7d32}
+.status-dot.red{background:#c62828}
+
+/* Gantt */
+.gantt-chart{position:relative;overflow-x:auto;min-height:200px}
+.gantt-header{display:flex;border-bottom:2px solid #e0e0e0;padding-bottom:4px;margin-bottom:8px}
+.gantt-header .month{flex:1;text-align:center;font-size:11px;color:#888;font-weight:600}
+.gantt-row{display:flex;align-items:center;height:28px;margin:2px 0;position:relative}
+.gantt-bar{position:absolute;height:20px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;color:#fff;font-weight:500;cursor:pointer;transition:opacity .2s;min-width:30px}
+.gantt-bar:hover{opacity:.85}
+.gantt-bar.critical{box-shadow:0 0 0 2px #c62828}
+.gantt-bar.dependency::after{content:'';position:absolute;right:-16px;top:50%;width:12px;height:2px;background:#666}
+.gantt-labels{font-size:12px;line-height:28px;color:#555}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:2px solid #e0e0e0;margin-bottom:16px}
+.tab{padding:10px 20px;font-size:13px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab:hover{color:#1a237e}
+.tab.active{color:#1a237e;border-bottom-color:#1a237e;font-weight:600}
+
+/* Heatmap */
+.heatmap{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:180px}
+.heatmap-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;border-radius:4px}
+.heatmap-cell.high{background:#c62828}
+.heatmap-cell.med{background:#e65100}
+.heatmap-cell.low{background:#f9a825}
+.heatmap-cell.none{background:#f5f5f5;color:#bbb}
+
+/* Issue board */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.board-col{background:#f5f5f5;border-radius:8px;padding:12px;min-height:200px}
+.board-col .col-title{font-size:12px;font-weight:600;color:#888;margin-bottom:12px;text-transform:uppercase}
+.board-card{background:#fff;border-radius:6px;padding:10px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;font-size:12px;border-left:3px solid #1a237e}
+.board-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.board-card .title{font-weight:600;margin-bottom:4px}
+
+/* Modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:100}
+.modal.open{display:flex}
+.modal-content{background:#fff;border-radius:12px;padding:24px;width:520px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-content h2{margin-bottom:16px;font-size:18px}
+.modal-content input,.modal-content select,.modal-content textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;margin-bottom:12px}
+.modal-content textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{animation:fadeIn .25s ease}
+
+/* Sidebar layout */
+.with-sidebar{display:flex;gap:16px;flex:1}
+.sidebar{width:240px;flex-shrink:0}
+.sidebar .menu-item{padding:10px 12px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;color:#555;transition:all .2s}
+.sidebar .menu-item:hover{background:#e8eaf6;color:#1a237e}
+.sidebar .menu-item.active{background:#1a237e;color:#fff}
+.main-content{flex:1;min-width:0}
+
+/* Application panel */
+.app-list .app-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:6px;border:1px solid #eee;margin-bottom:8px;transition:all .2s}
+.app-list .app-item:hover{border-color:#1a237e}
+.app-list .app-item .info{flex:1}
+.app-list .app-item .info .title{font-weight:600;font-size:13px}
+.app-list .app-item .info .meta{font-size:11px;color:#888;margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- ============================== Login ============================== -->
+<div id="login" class="screen active">
+  <div class="login-screen">
+    <div class="login-box">
+      <h1>PDM</h1>
+      <p class="subtitle">Project Development Manager</p>
+      <input type="email" placeholder="メールアドレス" value="admin@pdm.dev">
+      <input type="password" placeholder="パスワード" value="••••••••">
+      <button class="btn btn-primary" onclick="navigate('projects')">ログイン</button>
+      <p style="text-align:center;margin-top:16px;font-size:12px;color:#888">
+        SSO連携はこちら ▶
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Header ============================== -->
+<template id="header-tpl">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:24px">
+      <div class="logo" onclick="navigate('projects')" style="cursor:pointer">PDM<span>.</span></div>
+      <div class="nav" id="header-nav"></div>
+    </div>
+    <div class="user" onclick="navigate('login')">👤 管理者ユーザー <span style="font-size:10px">▼</span></div>
+  </div>
+</template>
+
+<!-- ============================== Projects ============================== -->
+<div id="projects" class="screen">
+  <div id="header-placeholder-p"></div>
+  <div class="container">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <input placeholder="🔍 プロジェクトを検索..." style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;width:280px;font-size:13px">
+        <select style="padding:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;color:#555">
+          <option>すべての状態</option>
+          <option>アクティブ</option>
+          <option>クローズ</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="alert('新規プロジェクト作成モーダル')">+ 新規作成</button>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="cursor:pointer" onclick="navigate('dashboard')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div style="font-weight:600;font-size:15px;margin-bottom:4px">新規システム開発</div>
+            <div style="font-size:12px;color:#888">2026/07/01 - 2026/12/31</div>
+          </div>
+          <span class="badge badge-active">アクティブ</span>
+        </div>
+        <div class="mt-8">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+            <span>65%</span><span>PM: 山田太郎</span>
+          </div>
+          <div class="progress-bar"><div class="fill orange" style="width:65%"></div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;color:#888">
+          <span>📌 フェーズ 5/8</span>
+          <span style="color:#c62828">⚠ 遅延 2</span>
+        </div>
+      </div>
+
+      <div class="card" style="cursor:pointer" onclick="navigate('dashboard')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div style="font-weight:600;font-size:15px;margin-bottom:4px">基盤ライブラリ開発</div>
+            <div style="font-size:12px;color:#888">2026/05/01 - 2026/08/31</div>
+          </div>
+          <span class="badge badge-active">アクティブ</span>
+        </div>
+        <div class="mt-8">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+            <span>85%</span><span>PM: 鈴木花子</span>
+          </div>
+          <div class="progress-bar"><div class="fill green" style="width:85%"></div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;color:#888">
+          <span>📌 フェーズ 3/4</span>
+          <span style="color:#2e7d32">● 順調</span>
+        </div>
+      </div>
+
+      <div class="card" style="cursor:pointer;opacity:.7" onclick="navigate('dashboard')">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div>
+            <div style="font-weight:600;font-size:15px;margin-bottom:4px">レガシーメンテナンス</div>
+            <div style="font-size:12px;color:#888">2026/01/01 - 2026/06/30</div>
+          </div>
+          <span class="badge badge-closed">クローズ</span>
+        </div>
+        <div class="mt-8">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px">
+            <span>100%</span><span>PM: 田中次郎</span>
+          </div>
+          <div class="progress-bar"><div class="fill green" style="width:100%"></div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;font-size:11px;color:#888">
+          <span>✅ 完了</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Dashboard ============================== -->
+<div id="dashboard" class="screen">
+  <div id="header-placeholder-d1"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a>
+      <span>›</span><span style="color:#333">新規システム開発</span>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:18px;font-weight:600;color:#1a237e">新規システム開発</div>
+          <div style="font-size:13px;color:#888;margin-top:2px">期間: 2026/07/01 - 2026/12/31 &nbsp;|&nbsp; 残日数: 193日</div>
+        </div>
+        <span class="badge badge-active">アクティブ</span>
+      </div>
+      <div class="mt-8">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:4px">
+          <span>進捗率: <strong>65%</strong></span>
+          <span>完了タスク: <strong>13/20</strong></span>
+          <span style="color:#c62828">遅延タスク: <strong>2</strong></span>
+        </div>
+        <div class="progress-bar"><div class="fill orange" style="width:65%"></div></div>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="phase-card" onclick="navigate('tasks')">
+        <div class="name">要件定義</div>
+        <div class="status"><span class="badge badge-closed">完了</span></div>
+        <div class="progress-bar"><div class="fill green" style="width:100%"></div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">ゲート通過済</div>
+      </div>
+      <div class="phase-card" onclick="navigate('tasks')">
+        <div class="name">設計</div>
+        <div class="status"><span class="badge badge-active">アクティブ</span></div>
+        <div class="progress-bar"><div class="fill green" style="width:90%"></div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">進捗 90%</div>
+      </div>
+      <div class="phase-card" onclick="navigate('tasks')" style="border-color:#1a237e;box-shadow:0 2px 8px rgba(26,35,126,.12)">
+        <div class="name">開発</div>
+        <div class="status"><span class="badge badge-warning">アクティブ</span></div>
+        <div class="progress-bar"><div class="fill orange" style="width:45%"></div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">進捗 45%</div>
+      </div>
+      <div class="phase-card" onclick="navigate('tasks')">
+        <div class="name">テスト</div>
+        <div class="status"><span class="badge badge-closed">未着手</span></div>
+        <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">開発完了後に開始</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📊 リスクヒートマップ</div>
+        <div style="display:flex;align-items:center;gap:24px">
+          <div>
+            <div style="display:flex;font-size:11px;color:#888;margin-bottom:4px">
+              <span style="width:24px"></span><span style="width:48px">高</span><span style="width:48px">中</span><span style="width:48px">低</span>
+            </div>
+            <div style="display:flex;align-items:center;margin-bottom:2px">
+              <span style="width:24px;font-size:11px;color:#888">高</span>
+              <div class="heatmap-cell high" style="width:48px;height:32px">1</div>
+              <div class="heatmap-cell med" style="width:48px;height:32px">2</div>
+              <div class="heatmap-cell low" style="width:48px;height:32px">1</div>
+            </div>
+            <div style="display:flex;align-items:center;margin-bottom:2px">
+              <span style="width:24px;font-size:11px;color:#888">中</span>
+              <div class="heatmap-cell high" style="width:48px;height:32px">2</div>
+              <div class="heatmap-cell med" style="width:48px;height:32px">3</div>
+              <div class="heatmap-cell low" style="width:48px;height:32px">2</div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <span style="width:24px;font-size:11px;color:#888">低</span>
+              <div class="heatmap-cell none" style="width:48px;height:32px">0</div>
+              <div class="heatmap-cell low" style="width:48px;height:32px">1</div>
+              <div class="heatmap-cell low" style="width:48px;height:32px">1</div>
+            </div>
+          </div>
+          <div style="font-size:12px">
+            <div style="margin-bottom:4px"><strong>合計:</strong> 12件</div>
+            <div style="color:#c62828">■ 高優先: 3件</div>
+            <div style="color:#e65100">■ 中優先: 5件</div>
+            <div style="color:#888">■ 低優先: 4件</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 課題サマリ</div>
+        <div style="display:flex;gap:24px;font-size:13px">
+          <div><span style="color:#c62828;font-weight:700">1</span> 緊急</div>
+          <div><span style="color:#e65100;font-weight:700">3</span> 高</div>
+          <div><span style="font-weight:700">5</span> 中</div>
+          <div><span style="color:#888">2</span> 低</div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#888">
+          <div style="display:flex;justify-content:space-between;padding:4px 0">未対応 <span>2件</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #eee">対応中 <span>4件</span></div>
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid #eee">解決済 <span>5件</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="cursor:pointer;border-left:4px solid #e65100" onclick="navigate('applications')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:600;font-size:14px">📨 承認待ち申請: <strong>3件</strong></div>
+          <div style="font-size:12px;color:#888;margin-top:2px">保留申請 2件 / ゲート通過申請 1件</div>
+        </div>
+        <span style="color:#1a237e;font-size:13px">確認する →</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Tasks (Main) ============================== -->
+<div id="tasks" class="screen">
+  <div id="header-placeholder-t"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">開発フェーズ</span>
+    </div>
+
+    <div class="with-sidebar">
+      <div class="sidebar">
+        <div class="card" style="padding:12px">
+          <div style="font-weight:600;font-size:13px;color:#1a237e;margin-bottom:8px">📂 フェーズ</div>
+          <div class="sidebar-menu">
+            <div class="menu-item" onclick="navigate('tasks')">要件定義 <span style="margin-left:auto">✓</span></div>
+            <div class="menu-item" onclick="navigate('tasks')">設計 <span style="margin-left:auto">✓</span></div>
+            <div class="menu-item active" onclick="navigate('tasks')">開発 <span style="margin-left:auto;font-size:11px;color:#ffd54f">●</span></div>
+            <div class="menu-item" onclick="navigate('tasks')" style="opacity:.5">テスト</div>
+            <div class="menu-item" onclick="navigate('tasks')" style="opacity:.5">リリース</div>
+          </div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid #eee">
+          <div style="font-size:11px;color:#888">
+            <div style="display:flex;gap:8px">
+              <span class="tag" onclick="navigate('risks')">⚠ リスク 12</span>
+              <span class="tag" onclick="navigate('issues')">📋 課題 11</span>
+            </div>
+            <div style="margin-top:6px">
+              <span class="tag" onclick="navigate('deliverables')">📄 成果物 24</span>
+            </div>
+            <div style="margin-top:6px">
+              <span class="tag" onclick="navigate('dependencies')">🔗 依存関係</span>
+            </div>
+            <div style="margin-top:6px">
+              <span class="tag" onclick="navigate('applications')">📨 申請 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="tabs">
+          <div class="tab active">ガントチャート</div>
+          <div class="tab" onclick="navigate('dependencies')">依存関係</div>
+          <div class="tab">リスト表示</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <input placeholder="🔍 フィルタ..." style="flex:1;padding:6px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px">
+            <select style="padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px"><option>すべての状態</option></select>
+            <select style="padding:6px;border:1px solid #ddd;border-radius:4px;font-size:12px"><option>担当者: すべて</option></select>
+            <button class="btn btn-primary btn-sm">+ タスク追加</button>
+          </div>
+
+          <!-- Gantt Chart -->
+          <div style="display:flex;gap:16px">
+            <div style="width:200px;flex-shrink:0;font-size:12px">
+              <div class="task-tree">
+                <div class="item level-1 selected"><span class="status-dot orange"></span>📌 画面設計</div>
+                <div class="item level-2"><span class="status-dot blue"></span>　UIモック作成</div>
+                <div class="item level-3"><span class="status-dot gray"></span>　 ヘッダーデザイン</div>
+                <div class="item level-3"><span class="status-dot green"></span>　 サイドバーデザイン</div>
+                <div class="item level-1"><span class="status-dot orange"></span>📌 API設計</div>
+                <div class="item level-2"><span class="status-dot blue"></span>　エンドポイント定義</div>
+                <div class="item level-2"><span class="status-dot gray"></span>　RDB設計</div>
+                <div class="item level-1"><span class="status-dot blue"></span>📌 DB設計</div>
+                <div class="item level-1"><span class="status-dot gray"></span>📌 API実装</div>
+                <div class="item level-1"><span class="status-dot gray"></span>📌 UI実装</div>
+              </div>
+            </div>
+
+            <div style="flex:1;overflow-x:auto">
+              <div class="gantt-header">
+                <div class="month">6月</div>
+                <div class="month">7月</div>
+                <div class="month">8月</div>
+                <div class="month">9月</div>
+              </div>
+              <div style="position:relative;height:220px">
+                <div class="gantt-row"><div class="gantt-bar" style="left:10%;width:25%;background:#1a237e">画面設計</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:12%;width:15%;background:#3949ab">UIモック</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:12%;width:8%;background:#666">ヘッダー</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:20%;width:8%;background:#2e7d32">サイドバー</div></div>
+                <div class="gantt-row"><div class="gantt-bar critical" style="left:35%;width:20%;background:#e65100">API設計</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:37%;width:12%;background:#1a237e">エンドポイント</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:37%;width:10%;background:#888">RDB設計</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:55%;width:15%;background:#3949ab">DB設計</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:55%;width:25%;background:#888">API実装</div></div>
+                <div class="gantt-row"><div class="gantt-bar" style="left:65%;width:25%;background:#888">UI実装</div></div>
+                <!-- Arrow indicators -->
+                <div style="position:absolute;left:36%;top:32px;font-size:10px;color:#c62828">▶ クリティカルパス</div>
+              </div>
+              <div style="display:flex;gap:8px;font-size:11px;color:#888;margin-top:4px">
+                <span>凡例:</span>
+                <span><span class="status-dot green"></span> 完了</span>
+                <span><span class="status-dot blue"></span> 対応中</span>
+                <span><span class="status-dot orange"></span> 承認待ち</span>
+                <span><span class="status-dot gray"></span> 未着手</span>
+                <span style="border:1px solid #c62828;padding:1px 4px;border-radius:2px;font-size:10px">クリティカル</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Detail Panel -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:600;font-size:14px">📋 選択中: 画面設計</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline btn-sm">🔗 依存関係</button>
+              <button class="btn btn-outline btn-sm">📄 成果物</button>
+              <button class="btn btn-outline btn-sm">⚠ リスク</button>
+              <button class="btn btn-primary btn-sm" onclick="alert('状態変更: 対応中→承認待ち')">状態変更</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:12px;font-size:13px">
+            <div><span style="color:#888">担当者:</span> 鈴木花子</div>
+            <div><span style="color:#888">状態:</span> <span class="badge badge-warning">対応中</span></div>
+            <div><span style="color:#888">見積工数:</span> 40h</div>
+            <div><span style="color:#888">実績工数:</span> 35h</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Dependencies ============================== -->
+<div id="dependencies" class="screen">
+  <div id="header-placeholder-dep"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">依存関係設定</span>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">🔗 タスク依存関係</div>
+        <button class="btn btn-primary btn-sm">+ 依存関係追加</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>先行タスク</th><th>依存タイプ</th><th>ラグ</th><th>後続タスク</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>UIモック作成</td><td><span class="tag">FS</span> 終了-開始</td><td>0日</td><td>API設計</td><td><button class="btn btn-outline btn-sm">削除</button></td></tr>
+          <tr><td>API設計</td><td><span class="tag">FS</span> 終了-開始</td><td>3日</td><td>API実装</td><td><button class="btn btn-outline btn-sm">削除</button></td></tr>
+          <tr><td>UIモック作成</td><td><span class="tag">SS</span> 開始-開始</td><td>0日</td><td>DB設計</td><td><button class="btn btn-outline btn-sm">削除</button></td></tr>
+          <tr><td>DB設計</td><td><span class="tag">FS</span> 終了-開始</td><td>0日</td><td>API実装</td><td><button class="btn btn-outline btn-sm">削除</button></td></tr>
+          <tr><td>API実装</td><td><span class="tag">FS</span> 終了-開始</td><td>0日</td><td>UI実装</td><td><button class="btn btn-outline btn-sm">削除</button></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:#fff3e0;border-radius:6px;font-size:12px">
+        <strong>⚠ クリティカルパス:</strong> UIモック作成 → API設計(3日ラグ) → API実装 → UI実装 (トータル: 45日)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Risks ============================== -->
+<div id="risks" class="screen">
+  <div id="header-placeholder-risk"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">リスク管理</span>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">⚠ リスク一覧</div>
+        <button class="btn btn-primary btn-sm" onclick="alert('新規リスク登録モーダル')">+ リスク登録</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>優先度</th><th>リスク名</th><th>影響</th><th>確率</th><th>状態</th><th>対応</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-danger">高</span></td><td>主要メンバーの離脱</td><td>大</td><td>中</td><td><span class="badge badge-warning">対策中</span></td><td>🥇</td></tr>
+          <tr><td><span class="badge badge-danger">高</span></td><td>サードパーティAPIの仕様変更</td><td>大</td><td>高</td><td><span class="badge badge-danger">未対応</span></td><td>-</td></tr>
+          <tr><td><span class="badge badge-warning">中</span></td><td>開発環境のリソース不足</td><td>中</td><td>中</td><td><span class="badge badge-active">監視中</span></td><td>🥈</td></tr>
+          <tr><td><span class="badge badge-warning">中</span></td><td>要件の追加発生</td><td>中</td><td>高</td><td><span class="badge badge-danger">未対応</span></td><td>-</td></tr>
+          <tr><td><span class="badge badge-closed">低</span></td><td>マニュアル作成遅延</td><td>小</td><td>低</td><td><span class="badge badge-active">クローズ</span></td><td>✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Issues ============================== -->
+<div id="issues" class="screen">
+  <div id="header-placeholder-iss"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">課題管理</span>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">📋 課題カンバン</div>
+        <button class="btn btn-primary btn-sm" onclick="alert('新規課題登録モーダル')">+ 課題登録</button>
+      </div>
+      <div class="board" style="margin-top:12px">
+        <div class="board-col">
+          <div class="col-title">未対応 (2)</div>
+          <div class="board-card" style="border-left-color:#c62828">
+            <div class="title">ログイン処理が遅延</div>
+            <div style="color:#c62828;font-size:10px;font-weight:600">緊急</div>
+            <div style="color:#888;font-size:10px;margin-top:4px">山田太郎 · 2026/07/15</div>
+          </div>
+          <div class="board-card" style="border-left-color:#e65100">
+            <div class="title">画面表示が崩れる</div>
+            <div style="color:#e65100;font-size:10px;font-weight:600">高</div>
+            <div style="color:#888;font-size:10px;margin-top:4px">鈴木花子 · 2026/07/14</div>
+          </div>
+        </div>
+        <div class="board-col">
+          <div class="col-title">対応中 (4)</div>
+          <div class="board-card" style="border-left-color:#e65100">
+            <div class="title">バリデーションエラー修正</div>
+            <div style="color:#e65100;font-size:10px;font-weight:600">高</div>
+            <div style="color:#888;font-size:10px;margin-top:4px">佐藤 · 2026/07/13</div>
+          </div>
+          <div class="board-card">
+            <div class="title">API応答速度改善</div>
+            <div style="color:#e65100;font-size:10px;font-weight:600">高</div>
+            <div style="color:#888;font-size:10px;margin-top:4px">田中 · 2026/07/12</div>
+          </div>
+        </div>
+        <div class="board-col">
+          <div class="col-title">解決済 (5)</div>
+          <div class="board-card" style="border-left-color:#2e7d32;opacity:.7">
+            <div class="title">DB接続タイムアウト</div>
+            <div style="color:#2e7d32;font-size:10px;font-weight:600">解決済</div>
+          </div>
+        </div>
+        <div class="board-col">
+          <div class="col-title">クローズ (3)</div>
+          <div class="board-card" style="border-left-color:#888;opacity:.5">
+            <div class="title">旧環境の互換性問題</div>
+            <div style="color:#888;font-size:10px">クローズ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Deliverables ============================== -->
+<div id="deliverables" class="screen">
+  <div id="header-placeholder-del"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">成果物管理</span>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">📄 成果物一覧</div>
+        <button class="btn btn-primary btn-sm">+ 成果物登録</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>名称</th><th>種別</th><th>バージョン</th><th>状態</th><th>レビューア</th><th>タスク</th></tr></thead>
+        <tbody>
+          <tr><td>画面設計書 v2</td><td><span class="tag">設計書</span></td><td>2.0</td><td><span class="badge badge-active">レビュー中</span></td><td>山田太郎</td><td>画面設計</td></tr>
+          <tr><td>API仕様書</td><td><span class="tag">設計書</span></td><td>1.0</td><td><span class="badge badge-warning">作成中</span></td><td>-</td><td>API設計</td></tr>
+          <tr><td>ER図</td><td><span class="tag">設計書</span></td><td>1.2</td><td><span class="badge badge-active">レビュー済</span></td><td>鈴木花子</td><td>DB設計</td></tr>
+          <tr><td>ソースコード (認証)</td><td><span class="tag">ソース</span></td><td>0.9</td><td><span class="badge badge-danger">未作成</span></td><td>-</td><td>API実装</td></tr>
+          <tr><td>単体テスト結果</td><td><span class="tag">テスト結果</span></td><td>-</td><td><span class="badge badge-danger">未作成</span></td><td>-</td><td>API実装</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Applications ============================== -->
+<div id="applications" class="screen">
+  <div id="header-placeholder-app"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">申請承認</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📨 承認待ち申請 <span class="badge badge-danger">3</span></div>
+      <div class="app-list">
+        <div class="app-item">
+          <span style="font-size:20px">⏸</span>
+          <div class="info">
+            <div class="title">保留申請: UI実装タスク</div>
+            <div class="meta">申請者: 佐藤次郎 · 2026/07/20 14:30</div>
+            <div class="meta" style="color:#c62828;font-style:italic">理由: 他タスクの優先度が高いため一時中断したい</div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="alert('承認しました')">承認</button>
+          <button class="btn btn-outline btn-sm" onclick="alert('却下モーダル')">却下</button>
+        </div>
+        <div class="app-item">
+          <span style="font-size:20px">⏸</span>
+          <div class="info">
+            <div class="title">保留申請: 環境構築</div>
+            <div class="meta">申請者: 田中一郎 · 2026/07/19 11:00</div>
+            <div class="meta" style="color:#c62828;font-style:italic">理由: ライセンス承認待ちのため</div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="alert('承認しました')">承認</button>
+          <button class="btn btn-outline btn-sm" onclick="alert('却下モーダル')">却下</button>
+        </div>
+        <div class="app-item">
+          <span style="font-size:20px">🚪</span>
+          <div class="info">
+            <div class="title">ゲート通過申請: 設計→開発</div>
+            <div class="meta">申請者: 山田太郎(PM) · 2026/07/18 16:00</div>
+            <div class="meta" style="color:#c62828;font-style:italic">理由: 設計Phase全タスク完了。開発Phase開始を承認願います</div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="alert('承認しました')">承認</button>
+          <button class="btn btn-outline btn-sm" onclick="alert('却下モーダル')">却下</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 承認/却下済み 履歴</div>
+      <table>
+        <thead><tr><th>種別</th><th>内容</th><th>申請者</th><th>結果</th><th>処理日</th></tr></thead>
+        <tbody>
+          <tr><td>⏸ 保留</td><td>API設計: 設計見直し</td><td>鈴木花子</td><td><span class="badge badge-active">承認済</span></td><td>2026/07/10</td></tr>
+          <tr><td>✋ 中断</td><td>レガシー連携調査</td><td>田中一郎</td><td><span class="badge badge-danger">却下</span></td><td>2026/07/08</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Phases ============================== -->
+<div id="phases" class="screen">
+  <div id="header-placeholder-ph"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">フェーズ管理</span>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">📌 フェーズ一覧</div>
+        <button class="btn btn-primary btn-sm">+ フェーズ追加</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>順序</th><th>フェーズ名</th><th>並列/直列</th><th>期間</th><th>状態</th><th>進捗</th><th>ゲート</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>要件定義</td><td><span class="tag">直列</span></td><td>07/01-07/15</td><td><span class="badge badge-active">完了</span></td><td><div class="progress-bar" style="width:80px"><div class="fill green" style="width:100%"></div></div></td><td><span class="badge badge-active">通過済</span></td></tr>
+          <tr><td>2</td><td>設計</td><td><span class="tag">直列</span></td><td>07/16-08/15</td><td><span class="badge badge-warning">アクティブ</span></td><td><div class="progress-bar" style="width:80px"><div class="fill green" style="width:90%"></div></div></td><td><span class="badge badge-warning">申請可能</span></td></tr>
+          <tr><td>3</td><td>開発</td><td><span class="tag">並列</span></td><td>08/01-10/31</td><td><span class="badge badge-warning">アクティブ</span></td><td><div class="progress-bar" style="width:80px"><div class="fill orange" style="width:45%"></div></div></td><td>-</td></tr>
+          <tr><td>4</td><td>テスト</td><td><span class="tag">直列</span></td><td>11/01-11/30</td><td><span class="badge badge-closed">未着手</span></td><td><div class="progress-bar" style="width:80px"><div class="fill" style="width:0%"></div></div></td><td>-</td></tr>
+          <tr><td>5</td><td>リリース</td><td><span class="tag">直列</span></td><td>12/01-12/31</td><td><span class="badge badge-closed">未着手</span></td><td><div class="progress-bar" style="width:80px"><div class="fill" style="width:0%"></div></div></td><td>-</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== Users ============================== -->
+<div id="users" class="screen">
+  <div id="header-placeholder-u"></div>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="#" onclick="navigate('projects')">プロジェクト一覧</a> <span>›</span>
+      <a href="#" onclick="navigate('dashboard')">新規システム開発</a> <span>›</span>
+      <span style="color:#333">ユーザー管理</span>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0">👥 メンバー一覧</div>
+        <button class="btn btn-primary btn-sm" onclick="alert('メンバー招待モーダル')">+ 招待</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>名前</th><th>メール</th><th>ロール</th><th>参加日</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>山田太郎</td><td>taro@pdm.dev</td><td><span class="badge" style="background:#1a237e;color:#fff">PM</span></td><td>2026/07/01</td><td><button class="btn btn-outline btn-sm">編集</button></td></tr>
+          <tr><td>鈴木花子</td><td>hanako@pdm.dev</td><td><span class="badge" style="background:#3949ab;color:#fff">サブリーダー</span></td><td>2026/07/01</td><td><button class="btn btn-outline btn-sm">編集</button></td></tr>
+          <tr><td>田中次郎</td><td>jiro@pdm.dev</td><td><span class="badge" style="background:#5c6bc0;color:#fff">作業者</span></td><td>2026/07/05</td><td><button class="btn btn-outline btn-sm">編集</button></td></tr>
+          <tr><td>佐藤さくら</td><td>sakura@pdm.dev</td><td><span class="badge" style="background:#5c6bc0;color:#fff">作業者</span></td><td>2026/07/01</td><td><button class="btn btn-outline btn-sm">編集</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Navigation
+let currentScreen = 'login';
+
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(screen);
+  if (el) el.classList.add('active');
+  currentScreen = screen;
+  injectHeaders(screen);
+}
+
+// Inject headers for screens that need them
+function injectHeaders(screen) {
+  const screens = ['projects','dashboard','tasks','dependencies','risks','issues','deliverables','applications','phases','users'];
+  if (!screens.includes(screen)) return;
+
+  const tpl = document.getElementById('header-tpl');
+  const nav = tpl.content.querySelector('#header-nav');
+
+  // Define nav items per screen
+  const navMap = {
+    projects: [],
+    dashboard: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'フェーズ',scr:'phases'},
+      {label:'タスク',scr:'tasks'},
+      {label:'リスク',scr:'risks'},
+      {label:'課題',scr:'issues'},
+      {label:'成果物',scr:'deliverables'},
+      {label:'申請',scr:'applications'},
+      {label:'メンバー',scr:'users'}
+    ],
+    tasks: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'フェーズ',scr:'phases'},
+      {label:'リスク',scr:'risks'},
+      {label:'課題',scr:'issues'},
+      {label:'依存関係',scr:'dependencies'}
+    ],
+    dependencies: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク管理',scr:'tasks'},
+      {label:'リスク',scr:'risks'},
+      {label:'課題',scr:'issues'}
+    ],
+    risks: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク管理',scr:'tasks'},
+      {label:'課題',scr:'issues'},
+      {label:'成果物',scr:'deliverables'}
+    ],
+    issues: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク管理',scr:'tasks'},
+      {label:'リスク',scr:'risks'},
+      {label:'成果物',scr:'deliverables'}
+    ],
+    deliverables: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク管理',scr:'tasks'},
+      {label:'リスク',scr:'risks'},
+      {label:'課題',scr:'issues'}
+    ],
+    applications: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク管理',scr:'tasks'}
+    ],
+    phases: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク',scr:'tasks'},
+      {label:'リスク',scr:'risks'},
+      {label:'申請',scr:'applications'}
+    ],
+    users: [
+      {label:'ダッシュボード',scr:'dashboard'},
+      {label:'タスク',scr:'tasks'}
+    ]
+  };
+
+  const items = navMap[screen] || [];
+  nav.innerHTML = items.map(i => `<a href="#" onclick="navigate('${i.scr}')">${i.label}</a>`).join('');
+
+  // Clone header into placeholder
+  const placeholders = document.querySelectorAll(`#header-placeholder-\\w+`);
+  document.querySelectorAll('[id^="header-placeholder-"]').forEach(p => {
+    p.innerHTML = '';
+    p.appendChild(tpl.content.cloneNode(true));
+    // Re-set nav items after clone
+    const pNav = p.querySelector('#header-nav');
+    if (pNav) pNav.innerHTML = items.map(i => `<a href="#" onclick="navigate('${i.scr}')">${i.label}</a>`).join('');
+  });
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  // Pre-populate all headers
+  const screens = ['projects','dashboard','tasks','dependencies','risks','issues','deliverables','applications','phases','users'];
+  screens.forEach(s => injectHeaders(s));
+});
+
+// Keyboard shortcut: ESC to go back
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (currentScreen === 'login') return;
+    if (currentScreen === 'projects') { navigate('login'); return; }
+    navigate('dashboard');
+  }
+});
+</script>
+</body>
+</html>
