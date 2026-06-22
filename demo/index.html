@@ -294,6 +294,11 @@ tr:hover{background:#f8f9ff}
         </div>
         <span class="badge badge-active">アクティブ</span>
       </div>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="openProjectFlow()">🔁 全体状態フロー図</button>
+        <button class="btn btn-outline btn-sm" onclick="navigate('tasks')">📋 タスク管理</button>
+        <button class="btn btn-outline btn-sm" onclick="navigate('phases')">📌 フェーズ管理</button>
+      </div>
       <div class="mt-8">
         <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:4px">
           <span>進捗率: <strong>65%</strong></span>
@@ -890,11 +895,14 @@ document.addEventListener('DOMContentLoaded', () => {
   screens.forEach(s => injectHeaders(s));
 });
 
-// Keyboard shortcut: ESC to go back, or close modal
+// Keyboard shortcut: ESC to close modal or go back
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if (document.getElementById('stateFlowModal').classList.contains('open')) {
+    if (document.getElementById('stateFlowModal')?.classList.contains('open')) {
       closeStateFlow(); return;
+    }
+    if (document.getElementById('projectFlowModal')?.classList.contains('open')) {
+      closeProjectFlow(); return;
     }
     if (currentScreen === 'login') return;
     if (currentScreen === 'projects') { navigate('login'); return; }
@@ -1033,7 +1041,184 @@ function renderStateFlow(currentState) {
 document.addEventListener('DOMContentLoaded', () => {
   const m = document.getElementById('stateFlowModal');
   if (m) m.addEventListener('click', function(e) { if (e.target === this) closeStateFlow(); });
+  const p = document.getElementById('projectFlowModal');
+  if (p) p.addEventListener('click', function(e) { if (e.target === this) closeProjectFlow(); });
 });
+
+// Project State Flow Diagram
+function openProjectFlow() {
+  document.getElementById('projectFlowModal').classList.add('open');
+  renderProjectFlow();
+}
+function closeProjectFlow() {
+  document.getElementById('projectFlowModal').classList.remove('open');
+}
+
+function renderProjectFlow() {
+  // Phase groups with tasks
+  const phases = [
+    {
+      name: '要件定義', x: 40, y: 20, status: 'completed',
+      tasks: [
+        {id:'t1', label:'要件ヒアリング', status:'completed', critical:false},
+        {id:'t2', label:'要件定義書作成', status:'completed', critical:false},
+        {id:'t3', label:'レビュー', status:'completed', critical:true}
+      ]
+    },
+    {
+      name: '設計', x: 40, y: 130, status: 'active',
+      tasks: [
+        {id:'t4', label:'画面設計', status:'in_progress', critical:true},
+        {id:'t5', label:'API設計', status:'in_progress', critical:true},
+        {id:'t6', label:'DB設計', status:'ready', critical:false}
+      ]
+    },
+    {
+      name: '開発', x: 40, y: 240, status: 'active',
+      tasks: [
+        {id:'t7', label:'API実装', status:'in_progress', critical:true},
+        {id:'t8', label:'UI実装', status:'ready', critical:false},
+        {id:'t9', label:'単体テスト', status:'not_started', critical:false},
+        {id:'t10', label:'結合テスト', status:'not_started', critical:true}
+      ]
+    },
+    {
+      name: 'テスト', x: 40, y: 365, status: 'pending',
+      tasks: [
+        {id:'t11', label:'システムテスト', status:'not_started', critical:true},
+        {id:'t12', label:'パフォーマンス', status:'not_started', critical:false},
+        {id:'t13', label:'UAT', status:'not_started', critical:false}
+      ]
+    },
+    {
+      name: 'リリース', x: 40, y: 470, status: 'pending',
+      tasks: [
+        {id:'t14', label:'リリース準備', status:'not_started', critical:true},
+        {id:'t15', label:'本番反映', status:'not_started', critical:true},
+        {id:'t16', label:'動作確認', status:'not_started', critical:false}
+      ]
+    }
+  ];
+
+  const statusColors = {
+    completed: {fill:'#2e7d32', text:'#fff'},
+    in_progress: {fill:'#1a237e', text:'#fff'},
+    awaiting_approval: {fill:'#e65100', text:'#fff'},
+    ready: {fill:'#f9a825', text:'#333'},
+    not_started: {fill:'#c62828', text:'#fff'},
+    on_hold: {fill:'#888', text:'#fff'},
+    suspended: {fill:'#888', text:'#fff'}
+  };
+
+  const PHASE_H = 80, TASK_W = 140, TASK_H = 24, GAP = 6, PHASE_GAP = 15;
+  const phaseColumns = phases.map(p => {
+    const cols = Math.ceil(p.tasks.length / 2);
+    return {name: p.name, cols, tasks: p.tasks};
+  });
+  const maxCols = Math.max(...phaseColumns.map(p => p.cols), 3);
+  const totalW = maxCols * (TASK_W + GAP) + 20;
+
+  const W = totalW + 60;
+  const H = 580;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="pfArrow" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4" fill="#888"/></marker>
+      <marker id="pfArrowCrit" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4" fill="#c62828"/></marker>
+      <filter id="pfShadow"><feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity=".12"/></filter>
+    </defs>`;
+
+  // Phase groups
+  phases.forEach((ph, pi) => {
+    const py = ph.y;
+    const phaseLabel = ph.status === 'completed' ? '✅ ' : ph.status === 'active' ? '🔄 ' : '⏳ ';
+    svg += `<rect x="20" y="${py}" width="${W-40}" height="${PHASE_H}" rx="8" fill="${ph.status==='completed'?'#f1f8e9':ph.status==='active'?'#e8eaf6':'#f5f5f5'}" stroke="${ph.status==='completed'?'#2e7d32':ph.status==='active'?'#1a237e':'#ddd'}" stroke-width="1.5"/>`;
+    svg += `<text x="30" y="${py+18}" font-size="11" font-weight="700" fill="#555">${phaseLabel}${ph.name}</text>`;
+
+    // Tasks in this phase
+    const cols = Math.ceil(ph.tasks.length / 2);
+    const colW = TASK_W + GAP;
+    const totalTaskW = cols * colW;
+    const startX = 30;
+
+    ph.tasks.forEach((task, ti) => {
+      const col = ti % cols;
+      const row = Math.floor(ti / cols);
+      const tx = startX + col * colW;
+      const ty = py + 28 + row * (TASK_H + 6);
+
+      const c = statusColors[task.status] || statusColors.not_started;
+      const isCrit = task.critical;
+
+      svg += `<g filter="url(#pfShadow)">`;
+      svg += `<rect x="${tx}" y="${ty}" width="${TASK_W}" height="${TASK_H}" rx="4" fill="${c.fill}" stroke="${isCrit?'#c62828':'transparent'}" stroke-width="${isCrit?2:0}"/>`;
+      svg += `<text x="${tx+8}" y="${ty+16}" fill="${c.text}" font-size="10" font-weight="500">${task.label}</text>`;
+      if (isCrit) {
+        svg += `<text x="${tx+TASK_W-4}" y="${ty+16}" text-anchor="end" fill="#c62828" font-size="7" font-weight="700">★</text>`;
+      }
+      svg += `</g>`;
+    });
+  });
+
+  // Dependency arrows between phases
+  const deps = [
+    {from: {phase:0,task:2}, to: {phase:1,task:0}}, // t3 -> t4
+    {from: {phase:1,task:1}, to: {phase:2,task:0}, critical:true}, // t5 -> t7
+    {from: {phase:1,task:0}, to: {phase:2,task:1}, critical:true}, // t4 -> t8
+    {from: {phase:2,task:3}, to: {phase:3,task:0}, critical:true}, // t10 -> t11
+    {from: {phase:2,task:2}, to: {phase:2,task:3}}, // t9 -> t10
+    {from: {phase:3,task:0}, to: {phase:4,task:0}, critical:true}, // t11 -> t14
+    {from: {phase:4,task:0}, to: {phase:4,task:1}, critical:true}, // t14 -> t15
+  ];
+
+  function getTaskPos(phaseIdx, taskIdx) {
+    const ph = phases[phaseIdx];
+    const cols = Math.ceil(ph.tasks.length / 2);
+    const col = taskIdx % cols;
+    const row = Math.floor(taskIdx / cols);
+    const colW = TASK_W + GAP;
+    return {
+      x: 30 + col * colW + TASK_W,
+      y: ph.y + 28 + row * (TASK_H + 6) + TASK_H/2
+    };
+  }
+
+  deps.forEach(d => {
+    const from = getTaskPos(d.from.phase, d.from.task);
+    const to = getTaskPos(d.to.phase, d.to.task);
+
+    // Find the target task's actual position
+    const tph = phases[d.to.phase];
+    const tcols = Math.ceil(tph.tasks.length / 2);
+    const tcol = d.to.task % tcols;
+    const trow = Math.floor(d.to.task / tcols);
+    const tcolW = TASK_W + GAP;
+    const toX = 30 + tcol * tcolW;
+
+    const isCrit = d.critical;
+    const color = isCrit ? '#c62828' : '#90a4ae';
+    const width = isCrit ? 2.5 : 1.5;
+
+    // Draw arrow from right edge of from task to left edge of to task
+    const y1 = from.y;
+    const y2 = tph.y + 28 + trow * (TASK_H + 6) + TASK_H/2;
+    const x1 = from.x;
+    const x2 = toX;
+
+    if (y2 > y1) {
+      svg += `<path d="M${x1},${y1} C${x1+40},${y1} ${x2-20},${y2} ${x2},${y2}" fill="none" stroke="${color}" stroke-width="${width}" marker-end="${isCrit?'url(#pfArrowCrit)':'url(#pfArrow)'}" opacity="0.7"/>`;
+    } else {
+      svg += `<path d="M${x1},${y1} L${x1+12},${y1} L${x1+12},${y2} L${x2},${y2}" fill="none" stroke="${color}" stroke-width="${width}" marker-end="${isCrit?'url(#pfArrowCrit)':'url(#pfArrow)'}" opacity="0.7"/>`;
+    }
+  });
+
+  // Critical path legend
+  const lastTask = phases[4].tasks[2];
+  const lpos = getTaskPos(4, 2);
+  svg += `<text x="30" y="${H-15}" font-size="10" fill="#c62828" font-weight="600">★ クリティカルパス: 要件定義書 → 画面設計 → UI実装 → 結合テスト → システムテスト → リリース準備 → 本番反映</text>`;
+
+  svg += '</svg>';
+  document.getElementById('projectFlowSvg').innerHTML = svg;
+}
 </script>
-</body>
 </html>
