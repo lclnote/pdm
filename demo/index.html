@@ -150,6 +150,23 @@ tr:hover{background:#f8f9ff}
 .app-list .app-item .info{flex:1}
 .app-list .app-item .info .title{font-weight:600;font-size:13px}
 .app-list .app-item .info .meta{font-size:11px;color:#888;margin-top:2px}
+
+/* State Flow Diagram */
+.state-flow{position:relative;padding:20px 0}
+.state-flow svg{width:100%;height:auto}
+.state-node{cursor:pointer;transition:all .3s}
+.state-node rect{transition:all .3s}
+.state-node:hover rect{filter:brightness(1.1)}
+.state-label{font-size:10px;fill:#666;text-anchor:middle}
+.flow-arrow{fill:none;stroke-width:2;stroke-linecap:round}
+.flow-arrow.active{stroke:#1a237e;stroke-width:3;stroke-dasharray:none}
+.flow-arrow.inactive{stroke:#e0e0e0;stroke-dasharray:5,3}
+.flow-arrow-label{font-size:8px;fill:#888;text-anchor:middle}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.state-current .flow-arrow.active{animation:pulse 1.5s infinite}
+.state-flow-legend{display:flex;gap:16px;font-size:11px;padding:8px 0;border-top:1px solid #eee;margin-top:12px}
+.state-flow-legend .leg-item{display:flex;align-items:center;gap:4px}
+.state-flow-legend .leg-line{width:20px;height:3px;border-radius:2px}
 </style>
 </head>
 <body>
@@ -491,6 +508,7 @@ tr:hover{background:#f8f9ff}
               <button class="btn btn-outline btn-sm">🔗 依存関係</button>
               <button class="btn btn-outline btn-sm">📄 成果物</button>
               <button class="btn btn-outline btn-sm">⚠ リスク</button>
+              <button class="btn btn-outline btn-sm" onclick="openStateFlow()">🔁 状態フロー図</button>
               <button class="btn btn-primary btn-sm" onclick="alert('状態変更: 対応中→承認待ち')">状態変更</button>
             </div>
           </div>
@@ -872,13 +890,149 @@ document.addEventListener('DOMContentLoaded', () => {
   screens.forEach(s => injectHeaders(s));
 });
 
-// Keyboard shortcut: ESC to go back
+// Keyboard shortcut: ESC to go back, or close modal
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    if (document.getElementById('stateFlowModal').classList.contains('open')) {
+      closeStateFlow(); return;
+    }
     if (currentScreen === 'login') return;
     if (currentScreen === 'projects') { navigate('login'); return; }
     navigate('dashboard');
   }
+});
+</script>
+
+<!-- State Flow Modal -->
+<div class="modal" id="stateFlowModal">
+  <div class="modal-content" style="width:800px;max-width:90vw">
+    <h2>🔁 状態フロー図 <span style="font-size:13px;color:#888;font-weight:400">— 画面設計 (対応中)</span></h2>
+    <div class="state-flow" id="stateFlowSvg"></div>
+    <div class="state-flow-legend">
+      <div class="leg-item"><div class="leg-line" style="background:#1a237e"></div> 現在の状態</div>
+      <div class="leg-item"><div class="leg-line" style="background:#2e7d32"></div> 遷移可能（担当者操作）</div>
+      <div class="leg-item"><div class="leg-line" style="background:#e65100;stroke-dasharray:5,3"></div> 遷移可能（申請→PM承認）</div>
+      <div class="leg-item"><div class="leg-line" style="background:#e0e0e0;stroke-dasharray:5,3"></div> 遷移不可</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="alert('画面設計: 対応中→承認待ち に状態変更')">対応中→承認待ち</button>
+      <button class="btn btn-outline" onclick="alert('保留申請モーダルを開く')">保留申請</button>
+      <button class="btn btn-outline" onclick="closeStateFlow()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// State Flow Diagram
+function openStateFlow() {
+  document.getElementById('stateFlowModal').classList.add('open');
+  renderStateFlow('in_progress');
+}
+
+function closeStateFlow() {
+  document.getElementById('stateFlowModal').classList.remove('open');
+}
+
+function renderStateFlow(currentState) {
+  const states = [
+    {id:'not_started', label:'未着手', x:40, y:20},
+    {id:'ready', label:'着手可能', x:200, y:20},
+    {id:'in_progress', label:'対応中', x:200, y:140},
+    {id:'awaiting_approval', label:'承認待ち', x:360, y:140},
+    {id:'completed', label:'完了', x:520, y:140},
+    {id:'on_hold', label:'保留', x:360, y:260},
+    {id:'suspended', label:'中断', x:520, y:260}
+  ];
+
+  const transitions = [
+    {from:'not_started', to:'ready', label:'依存完了\n(自動)', type:'auto'},
+    {from:'not_started', to:'suspended', label:'中断申請\n→PM承認', type:'apply'},
+    {from:'ready', to:'in_progress', label:'開始', type:'active'},
+    {from:'ready', to:'suspended', label:'中断申請\n→PM承認', type:'apply'},
+    {from:'in_progress', to:'awaiting_approval', label:'成果物提出', type:'active'},
+    {from:'in_progress', to:'on_hold', label:'保留申請\n→PM承認', type:'apply'},
+    {from:'in_progress', to:'suspended', label:'中断申請\n→PM承認', type:'apply'},
+    {from:'awaiting_approval', to:'completed', label:'承認', type:'active'},
+    {from:'awaiting_approval', to:'in_progress', label:'差戻し', type:'active'},
+    {from:'on_hold', to:'ready', label:'保留解除申請\n→PM承認', type:'apply'},
+    {from:'on_hold', to:'suspended', label:'中断申請\n→PM承認', type:'apply'}
+  ];
+
+  const idx = {};
+  states.forEach((s,i) => idx[s.id]=i);
+
+  const W=640, H=340;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrowActive" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#1a237e"/></marker>
+      <marker id="arrowApply" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#e65100"/></marker>
+      <filter id="shadow"><feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity=".15"/></filter>
+    </defs>`;
+
+  transitions.forEach(t => {
+    const f = idx[t.from], to = idx[t.to];
+    if (f === undefined || to === undefined) return;
+    const x1 = states[f].x + 80, y1 = states[f].y + 30;
+    const x2 = states[to].x, y2 = states[to].y + 30;
+
+    const isActive = t.from === currentState;
+    const isApply = t.type === 'apply';
+
+    let stroke = '#e0e0e0', marker = '', dash = '5,3', opacity = '0.25';
+    if (isActive) {
+      stroke = isApply ? '#e65100' : '#1a237e';
+      marker = isApply ? 'url(#arrowApply)' : 'url(#arrowActive)';
+      dash = isApply ? '6,3' : 'none';
+      opacity = '1';
+    }
+
+    const dx = x2 - x1, dy = y2 - y1;
+    let path = '';
+    if (dy === 0) {
+      path = `M${x1},${y1} L${x2},${y2}`;
+    } else if (Math.abs(dy) > 60) {
+      const mid = y1 + dy/2;
+      path = `M${x1},${y1} C${x1},${mid} ${x2},${mid} ${x2},${y2}`;
+    } else {
+      path = `M${x1},${y1} Q${(x1+x2)/2},${(y1+y2)/2} ${x2},${y2}`;
+    }
+
+    svg += `<path d="${path}" stroke="${stroke}" stroke-width="${isActive?3:1.5}" stroke-dasharray="${dash}" opacity="${opacity}" fill="none" marker-end="${marker}" class="${isActive?'':'inactive'}" style="${isActive?'animation:pulse 2s infinite':''}"/>`;
+
+    if (isActive) {
+      const lx = (x1 + x2) / 2, ly = (y1 + y2) / 2 - 10;
+      const lines = t.label.split('\n');
+      lines.forEach((line, i) => {
+        svg += `<text x="${lx}" y="${ly + i * 12}" text-anchor="middle" fill="${isApply?'#e65100':'#1a237e'}" font-size="9" font-weight="600">${line}</text>`;
+      });
+    }
+  });
+
+  states.forEach((s) => {
+    const isCurrent = s.id === currentState;
+    const fill = isCurrent ? '#1a237e' : '#fff';
+    const txt = isCurrent ? '#fff' : '#333';
+    const brd = isCurrent ? '#1a237e' : '#ddd';
+    const sw = isCurrent ? 3 : 2;
+
+    svg += `<g filter="${isCurrent?'url(#shadow)':''}">`;
+    svg += `<rect x="${s.x}" y="${s.y}" width="80" height="36" rx="6" fill="${fill}" stroke="${brd}" stroke-width="${sw}"/>`;
+    svg += `<text x="${s.x+40}" y="${s.y+23}" text-anchor="middle" fill="${txt}" font-size="13" font-weight="${isCurrent?'700':'500'}">${s.label}</text>`;
+    svg += `</g>`;
+
+    if (isCurrent) {
+      svg += `<text x="${s.x+40}" y="${s.y-6}" text-anchor="middle" fill="#1a237e" font-size="9" font-weight="600">◀ 現在地 ▶</text>`;
+    }
+  });
+
+  svg += '</svg>';
+  document.getElementById('stateFlowSvg').innerHTML = svg;
+}
+
+// Click outside to close
+document.addEventListener('DOMContentLoaded', () => {
+  const m = document.getElementById('stateFlowModal');
+  if (m) m.addEventListener('click', function(e) { if (e.target === this) closeStateFlow(); });
 });
 </script>
 </body>
