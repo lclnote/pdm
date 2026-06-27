@@ -313,9 +313,23 @@ export default function PhasesPage() {
                     {ph.name}
                     {(warn || tCount > 0) && <span title={warn || t('warning.taskWarnings', {count: tCount})} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}
                   </strong>
-                  <span className={`badge ${phaseStatusBadge(ph.status)}`}>
-                    {t(`phase.status.${ph.status}`, ph.status)}
-                  </span>
+                  <select
+                    value={ph.status}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={async (e) => {
+                      e.stopPropagation()
+                      try {
+                        const res = await api.put(`/phases/${ph.id}`, { status: e.target.value })
+                        setPhases(phases.map((p) => p.id === ph.id ? res.data : p))
+                      } catch { alert('Status change failed') }
+                    }}
+                    className={`badge ${phaseStatusBadge(ph.status)}`}
+                    style={{ cursor: 'pointer', border: 'none', fontSize: '11px', padding: '2px 8px', outline: 'none' }}
+                  >
+                    {['planned', 'active', 'gate_waiting', 'completed', 'closed'].map((s) => (
+                      <option key={s} value={s}>{t(`phase.status.${s}`)}</option>
+                    ))}
+                  </select>
                 </div>
                 {ph.description && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{ph.description}</p>}
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
