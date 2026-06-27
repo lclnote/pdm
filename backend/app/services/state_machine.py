@@ -3,8 +3,8 @@ TASK_TRANSITIONS = {
     "ready": ["in_progress", "suspended"],
     "in_progress": ["awaiting_approval", "on_hold", "suspended"],
     "awaiting_approval": ["in_progress", "completed"],
-    "on_hold": ["ready", "suspended"],
-    "suspended": [],
+    "on_hold": ["ready", "in_progress", "suspended"],
+    "suspended": ["in_progress"],
     "completed": [],
 }
 
@@ -19,7 +19,9 @@ TRANSITION_ACTORS = {
     ("awaiting_approval", "in_progress"): "approver",
     ("awaiting_approval", "completed"): "approver",
     ("on_hold", "ready"): "pm",
+    ("on_hold", "in_progress"): "approver",
     ("on_hold", "suspended"): "pm",
+    ("suspended", "in_progress"): "approver",
 }
 
 APPLICATION_TRANSITIONS = {

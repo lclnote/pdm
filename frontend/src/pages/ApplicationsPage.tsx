@@ -59,9 +59,11 @@ export default function ApplicationsPage() {
     try {
       await api.put(`/applications/${app.id}/approve`, { application_type: app.application_type })
       
-      // If it is a task submission, also complete the task status
       if (app.task_id) {
-        await api.put(`/tasks/${app.task_id}/status`, { status: 'completed' })
+        // task_submission → completed, hold/suspend stay as-is
+        if (app.application_type === 'task_submission') {
+          await api.put(`/tasks/${app.task_id}/status`, { status: 'completed' })
+        }
       }
 
       setApplications(applications.map((a) => a.id === app.id ? { ...a, status: 'approved' } : a))
@@ -79,8 +81,8 @@ export default function ApplicationsPage() {
         rejection_reason: rejectionReason,
       })
 
-      // If it is a task submission, move task back to in_progress
       if (showRejectModal.task_id) {
+        // All rejections roll back the task to in_progress
         await api.put(`/tasks/${showRejectModal.task_id}/status`, { status: 'in_progress' })
       }
 
