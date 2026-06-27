@@ -116,6 +116,7 @@
     "levelLabel": "Level:",
     "periodLabel": "Period:",
     "weightLabel": "Weight:",
+    "progressLabel": "Progress (%)",
     "actualHoursLabel": "Actual Hours:",
     "assigneeLabel": "Assignee:",
     "collaboratorsLabel": "Collaborators:",

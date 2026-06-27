@@ -10,6 +10,7 @@ class TaskBase(BaseModel):
     assignee_id: UUID
     estimated_hours: float = 0
     weight: float = 1.0
+    progress: int = 0
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     sort_order: int = 0
@@ -26,6 +27,7 @@ class TaskUpdate(BaseModel):
     estimated_hours: Optional[float] = None
     actual_hours: Optional[float] = None
     weight: Optional[float] = None
+    progress: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     sort_order: Optional[int] = None

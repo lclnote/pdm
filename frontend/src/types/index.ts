@@ -44,6 +44,7 @@ export interface Task {
   actual_hours?: number;
   status: string;
   weight: number;
+  progress: number;
   start_date?: string;
   end_date?: string;
   sort_order: number;

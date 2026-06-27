@@ -20,6 +20,7 @@ class Task(Base):
     actual_hours = Column(Numeric(10, 2), nullable=True)
     status = Column(String(20), nullable=False, default="not_started")
     weight = Column(Numeric(5, 2), nullable=False, default=1.00)
+    progress = Column(Integer, nullable=False, default=0)
     start_date = Column(Date, nullable=True)
     end_date = Column(Date, nullable=True)
     sort_order = Column(Integer, nullable=False, default=0)
