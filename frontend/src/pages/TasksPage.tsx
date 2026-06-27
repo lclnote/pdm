@@ -59,10 +59,17 @@ export default function TasksPage() {
       return a.start_date < b.start_date ? -1 : 1
     }).map((t) => ({ ...t, children: t.children ? sortByStartDate(t.children) : undefined }))
 
+  const [projectMembers, setProjectMembers] = useState<{ user_id: string }[]>([])
+
   useEffect(() => {
     if (!phaseId) return
     api.get(`/phases/${phaseId}/tasks`).then((res) => setTasks(sortByStartDate(res.data)))
   }, [phaseId])
+
+  useEffect(() => {
+    if (!projectId) return
+    api.get(`/projects/${projectId}/members`).then((res) => setProjectMembers(res.data)).catch(() => {})
+  }, [projectId])
 
   useEffect(() => {
     if (!projectId || !phaseId) return
@@ -103,6 +110,7 @@ export default function TasksPage() {
   )
 
   const filteredUsers = users.filter((u) =>
+    projectMembers.some((m) => m.user_id === u.id) &&
     u.name.toLowerCase().includes(assigneeName.toLowerCase())
   )
 
@@ -305,9 +313,9 @@ export default function TasksPage() {
                 <input value={collaboratorName} onChange={(e) => { setCollaboratorName(e.target.value); setShowCollabDropdown(true) }} onFocus={() => setShowCollabDropdown(true)} placeholder={t('task.addCollaborator')} style={{ width: '120px', fontSize: '12px', padding: '2px 8px', height: '24px' }} />
                 {showCollabDropdown && (
                   <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 10, width: '200px', maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                    {users.filter((u) => u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).length === 0 ? (
+                    {users.filter((u) => projectMembers.some((m) => m.user_id === u.id) && u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).length === 0 ? (
                       <div style={{ padding: '6px 10px', color: 'var(--text-secondary)', fontSize: '12px' }}>{t('task.noUsersFound')}</div>
-                    ) : users.filter((u) => u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).map((u) => (
+                    ) : users.filter((u) => projectMembers.some((m) => m.user_id === u.id) && u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).map((u) => (
                       <div key={u.id} onClick={() => {
                         api.post(`/tasks/${selectedTask.id}/collaborators`, { user_id: u.id }).then((res) => {
                           setCollaborators([...collaborators, res.data]); setCollaboratorName(''); setShowCollabDropdown(false)
