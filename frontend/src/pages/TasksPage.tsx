@@ -338,7 +338,7 @@ export default function TasksPage() {
               onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
               onClick={(e) => e.stopPropagation()}
               className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}
-              style={{ cursor: 'pointer', border: 'none', fontSize: '11px', padding: '2px 8px', outline: 'none' }}
+              style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px' }}
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>{statusLabel(s)}</option>
