@@ -35,7 +35,7 @@ class ProjectResponse(ProjectBase):
 
 
 class ProjectMemberBase(BaseModel):
-    user_id: str
+    user_id: UUID
     role_in_project: str
 
 
