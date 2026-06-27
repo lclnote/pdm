@@ -23,6 +23,8 @@ export default function PhasesPage() {
   const [taskWarns, setTaskWarns] = useState<Record<string, number>>({})
   const [projStartDate, setProjStartDate] = useState('')
   const [projEndDate, setProjEndDate] = useState('')
+  const [progressCalcMethod, setProgressCalcMethod] = useState('task_count')
+  const [phaseProgress, setPhaseProgress] = useState<Record<string, number>>({})
   const [showCreate, setShowCreate] = useState(false)
   const [showEdit, setShowEdit] = useState<Phase | null>(null)
   const [showGateModal, setShowGateModal] = useState<Phase | null>(null)
@@ -96,12 +98,31 @@ export default function PhasesPage() {
       setPhases(phs)
       setProjStartDate(projRes.data.start_date || '')
       setProjEndDate(projRes.data.end_date || '')
+      setProgressCalcMethod(projRes.data.progress_calc_method || 'task_count')
       const warns: Record<string, number> = {}
+      const progressMap: Record<string, number> = {}
       await Promise.all(phs.map(async (ph) => {
         try {
           const tRes = await api.get(`/phases/${ph.id}/tasks`)
+          const tasksList = tRes.data
           let count = 0
-          for (const t of tRes.data) {
+
+          // Calculate leaf-based progress for this phase
+          const getLeaves = (items: any[]): any[] => {
+            return items.flatMap(t => t.children && t.children.length > 0 ? getLeaves(t.children) : [t])
+          }
+          const leaves = getLeaves(tasksList)
+          if (leaves.length > 0 && projRes.data.progress_calc_method === 'hour') {
+            const totalEstimated = leaves.reduce((s, t) => s + (t.estimated_hours || 0), 0)
+            const totalActual = leaves.reduce((s, t) => t.status === 'completed' ? s + (t.actual_hours || t.estimated_hours || 0) : s, 0)
+            if (totalEstimated > 0) progressMap[ph.id] = Math.round((totalActual / totalEstimated) * 100)
+          } else if (leaves.length > 0) {
+            const totalWeight = leaves.reduce((s, t) => s + (Number(t.weight) || 1.0), 0)
+            const completedWeight = leaves.reduce((s, t) => t.status === 'completed' ? s + (Number(t.weight) || 1.0) : s, 0)
+            if (totalWeight > 0) progressMap[ph.id] = Math.round((completedWeight / totalWeight) * 100)
+          }
+
+          for (const t of tasksList) {
             if (t.start_date || t.end_date) {
               if (taskDateWarning(t.start_date || undefined, t.end_date || undefined, ph.start_date || undefined, ph.end_date || undefined)) count++
             }
@@ -109,6 +130,7 @@ export default function PhasesPage() {
           if (count > 0) warns[ph.id] = count
         } catch {}
       }))
+      setPhaseProgress(progressMap)
       setTaskWarns({ ...warns })
     } catch (e) { console.error(e) }
   }
@@ -302,6 +324,13 @@ export default function PhasesPage() {
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                   {t('common.order')}: {ph.sort_order}
                   {ph.parallel_execution && t('common.parallel')}
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{t('project.progress')}</span>
+                  <span style={{ fontWeight: 600 }}>{phaseProgress[ph.id] ?? 0}%</span>
+                </div>
+                <div className="progress-bar" style={{ marginTop: '4px', marginBottom: '6px', height: '6px' }}>
+                  <div className="progress-bar-fill" style={{ width: `${phaseProgress[ph.id] ?? 0}%`, height: '100%' }} />
                 </div>
                 {warn && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {warn}</div>}
                 {tCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t('warning.taskWarnings', {count: tCount})}</div>}

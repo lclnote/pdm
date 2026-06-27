@@ -27,6 +27,7 @@ export default function ProjectsPage() {
   const [endDate, setEndDate] = useState('')
   const [progressCalcMethod, setProgressCalcMethod] = useState('task_count')
   const [status, setStatus] = useState('pending')
+  const [projectProgress, setProjectProgress] = useState<Record<string, number>>({})
   const navigate = useNavigate()
 
   useEffect(() => { loadProjects() }, [])
@@ -43,9 +44,14 @@ export default function ProjectsPage() {
       })
       setProjects(projs)
       const warns: Record<string, { phaseCount: number; taskCount: number }> = {}
+      const progressMap: Record<string, number> = {}
       await Promise.all(projs.map(async (p) => {
         try {
-          const phRes = await api.get(`/projects/${p.id}/phases`)
+          const [phRes, dashRes] = await Promise.all([
+            api.get(`/projects/${p.id}/phases`),
+            api.get(`/projects/${p.id}/dashboard`),
+          ])
+          progressMap[p.id] = dashRes.data.progress ?? 0
           const phases = phRes.data
           let phaseCount = 0
           let taskCount = 0
@@ -69,6 +75,7 @@ export default function ProjectsPage() {
           if (phaseCount > 0 || taskCount > 0) warns[p.id] = { phaseCount, taskCount }
         } catch {}
       }))
+      setProjectProgress(progressMap)
       setWarnings(warns)
     } catch (e) { console.error(e) }
   }
@@ -148,6 +155,13 @@ export default function ProjectsPage() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>{p.description}</p>
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                   {t('dateRange.format', {start: p.start_date, end: p.end_date})}
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{t('project.progress')}</span>
+                  <span style={{ fontWeight: 600 }}>{projectProgress[p.id] ?? 0}%</span>
+                </div>
+                <div className="progress-bar" style={{ marginTop: '4px', marginBottom: '6px', height: '6px' }}>
+                  <div className="progress-bar-fill" style={{ width: `${projectProgress[p.id] ?? 0}%`, height: '100%' }} />
                 </div>
                 {self && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t(self)}</div>}
                 {w?.phaseCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>{t('project.phaseWarnings', {count: w.phaseCount})}</div>}
