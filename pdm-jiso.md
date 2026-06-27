@@ -24,8 +24,8 @@
 
 | # | 機能 | Backend | Frontend | 作業内容 |
 |---|------|---------|----------|----------|
-| 6 | **タスク協力者** | 🔶 | ❌ | TaskCollaboratorルーター追加（モデル・スキーマ既存）→ TasksPageに協力者追加UI |
-| 7 | **リスク対応策** | 🔶 | ❌ | RiskCountermeasureルーター追加（モデル・スキーマ既存）→ RisksPageに対応策UI |
+| 6 | **タスク協力者** | ✅ | ✅ | TaskCollaboratorルーター追加（モデル・スキーマ既存）→ TasksPageに協力者追加UI |
+| 7 | **リスク対応策** | ✅ | ✅ | RiskCountermeasureルーター追加（モデル・スキーマ既存）→ RisksPageに対応策UI |
 | 8 | **進捗計算方式切替** | ✅ | ✅ | Project編集画面にprogress_calc_method選択追加（task_count/hour） |
 
 ## Level 3: 中程度（新規ページ、APIは概ね既存）
