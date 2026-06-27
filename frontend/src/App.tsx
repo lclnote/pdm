@@ -7,7 +7,6 @@ import PhasesPage from './pages/PhasesPage'
 import TasksPage from './pages/TasksPage'
 import RisksPage from './pages/RisksPage'
 import IssuesPage from './pages/IssuesPage'
-import ApplicationsPage from './pages/ApplicationsPage'
 import ProjectMembersPage from './pages/ProjectMembersPage'
 import DeliverablesPage from './pages/DeliverablesPage'
 import SearchPage from './pages/SearchPage'
@@ -30,7 +29,6 @@ export default function App() {
         <Route path="projects/:projectId/phases/:phaseId/tasks" element={<TasksPage />} />
         <Route path="projects/:projectId/risks" element={<RisksPage />} />
         <Route path="projects/:projectId/issues" element={<IssuesPage />} />
-        <Route path="projects/:projectId/applications" element={<ApplicationsPage />} />
         <Route path="projects/:projectId/members" element={<ProjectMembersPage />} />
         <Route path="projects/:projectId/deliverables" element={<DeliverablesPage />} />
         <Route path="projects/:projectId/search" element={<SearchPage />} />

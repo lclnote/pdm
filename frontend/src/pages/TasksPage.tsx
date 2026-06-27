@@ -126,15 +126,6 @@ export default function TasksPage() {
   }, [selectedTask])
 
   const [showEdit, setShowEdit] = useState<Task | null>(null)
-  const [showApplyModal, setShowApplyModal] = useState<Task | null>(null)
-  const [applyReason, setApplyReason] = useState('')
-  const [applyEvidence, setApplyEvidence] = useState('')
-  const [showHoldModal, setShowHoldModal] = useState<Task | null>(null)
-  const [holdReason, setHoldReason] = useState('')
-  const [holdEvidence, setHoldEvidence] = useState('')
-  const [showSuspendModal, setShowSuspendModal] = useState<Task | null>(null)
-  const [suspendReason, setSuspendReason] = useState('')
-  const [suspendEvidence, setSuspendEvidence] = useState('')
   const [collaborators, setCollaborators] = useState<{ id: string; user_id: string }[]>([])
   const [taskDeliverables, setTaskDeliverables] = useState<any[]>([])
   const [showAddDlModal, setShowAddDlModal] = useState(false)
@@ -211,89 +202,6 @@ export default function TasksPage() {
       })
     } catch (e: any) {
       alert(e.response?.data?.detail?.message || t('task.statusChangeFailed'))
-    }
-  }
-
-  const submitApplyRequest = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!showApplyModal) return
-    try {
-      await api.post('/tasks/apply', {
-        task_id: showApplyModal.id,
-        application_type: 'task_submission',
-        reason: applyReason,
-        evidence: applyEvidence || undefined,
-      })
-      await api.put(`/tasks/${showApplyModal.id}/status`, { status: 'awaiting_approval' })
-
-      const update = (items: Task[]): Task[] => items.map((t) =>
-        t.id === showApplyModal.id ? { ...t, status: 'awaiting_approval' } : { ...t, children: t.children ? update(t.children) : undefined }
-      )
-      setTasks(update(tasks))
-
-      if (selectedTask?.id === showApplyModal.id) {
-        setSelectedTask({ ...selectedTask, status: 'awaiting_approval' })
-      }
-
-      setShowApplyModal(null)
-      setApplyReason('')
-      setApplyEvidence('')
-    } catch {
-      alert('Application failed')
-    }
-  }
-
-  const submitHoldRequest = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!showHoldModal) return
-    try {
-      await api.post('/tasks/apply', {
-        task_id: showHoldModal.id,
-        application_type: 'hold',
-        reason: holdReason,
-        evidence: holdEvidence || undefined,
-      })
-      await api.put(`/tasks/${showHoldModal.id}/status`, { status: 'on_hold' })
-
-      const update = (items: Task[]): Task[] => items.map((t) =>
-        t.id === showHoldModal.id ? { ...t, status: 'on_hold' } : { ...t, children: t.children ? update(t.children) : undefined }
-      )
-      setTasks(update(tasks))
-      if (selectedTask?.id === showHoldModal.id) {
-        setSelectedTask({ ...selectedTask, status: 'on_hold' })
-      }
-      setShowHoldModal(null)
-      setHoldReason('')
-      setHoldEvidence('')
-    } catch {
-      alert('Hold request failed')
-    }
-  }
-
-  const submitSuspendRequest = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!showSuspendModal) return
-    try {
-      await api.post('/tasks/apply', {
-        task_id: showSuspendModal.id,
-        application_type: 'suspend',
-        reason: suspendReason,
-        evidence: suspendEvidence || undefined,
-      })
-      await api.put(`/tasks/${showSuspendModal.id}/status`, { status: 'suspended' })
-
-      const update = (items: Task[]): Task[] => items.map((t) =>
-        t.id === showSuspendModal.id ? { ...t, status: 'suspended' } : { ...t, children: t.children ? update(t.children) : undefined }
-      )
-      setTasks(update(tasks))
-      if (selectedTask?.id === showSuspendModal.id) {
-        setSelectedTask({ ...selectedTask, status: 'suspended' })
-      }
-      setShowSuspendModal(null)
-      setSuspendReason('')
-      setSuspendEvidence('')
-    } catch {
-      alert('Suspend request failed')
     }
   }
 
@@ -405,15 +313,6 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              {selectedTask.status !== 'completed' && selectedTask.status !== 'awaiting_approval' && (
-                <button className="btn btn-primary" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowApplyModal(selectedTask); setApplyReason(''); setApplyEvidence('') }}>{t('task.applyCompletion')}</button>
-              )}
-              {selectedTask.status === 'in_progress' && (
-                <>
-                  <button className="btn btn-warning" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowHoldModal(selectedTask); setHoldReason(''); setHoldEvidence('') }}>{t('task.applyHold')}</button>
-                  <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => { setShowSuspendModal(selectedTask); setSuspendReason(''); setSuspendEvidence('') }}>{t('task.applySuspend')}</button>
-                </>
-              )}
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
@@ -652,63 +551,6 @@ export default function TasksPage() {
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.create')}</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {showApplyModal && (
-        <Modal title={t('task.applyCompletionTitle')} onClose={() => setShowApplyModal(null)}>
-          <form onSubmit={submitApplyRequest}>
-            <div className="form-group">
-              <label>{t('task.applyReason')}</label>
-              <textarea value={applyReason} onChange={(e) => setApplyReason(e.target.value)} rows={3} required />
-            </div>
-            <div className="form-group">
-              <label>{t('task.applyEvidence')}</label>
-              <input value={applyEvidence} onChange={(e) => setApplyEvidence(e.target.value)} placeholder="https://..." />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowApplyModal(null)}>{t('common.cancel')}</button>
-              <button type="submit" className="btn btn-primary">{t('common.submit')}</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {showHoldModal && (
-        <Modal title={t('task.applyHoldTitle')} onClose={() => setShowHoldModal(null)}>
-          <form onSubmit={submitHoldRequest}>
-            <div className="form-group">
-              <label>{t('task.applyReason')}</label>
-              <textarea value={holdReason} onChange={(e) => setHoldReason(e.target.value)} rows={3} required />
-            </div>
-            <div className="form-group">
-              <label>{t('task.applyEvidence')}</label>
-              <input value={holdEvidence} onChange={(e) => setHoldEvidence(e.target.value)} placeholder="https://..." />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowHoldModal(null)}>{t('common.cancel')}</button>
-              <button type="submit" className="btn" style={{ background: '#e65100', color: '#fff' }}>{t('task.submitHold')}</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {showSuspendModal && (
-        <Modal title={t('task.applySuspendTitle')} onClose={() => setShowSuspendModal(null)}>
-          <form onSubmit={submitSuspendRequest}>
-            <div className="form-group">
-              <label>{t('task.applyReason')}</label>
-              <textarea value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} rows={3} required />
-            </div>
-            <div className="form-group">
-              <label>{t('task.applyEvidence')}</label>
-              <input value={suspendEvidence} onChange={(e) => setSuspendEvidence(e.target.value)} placeholder="https://..." />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowSuspendModal(null)}>{t('common.cancel')}</button>
-              <button type="submit" className="btn" style={{ background: '#c62828', color: '#fff' }}>{t('task.submitSuspend')}</button>
             </div>
           </form>
         </Modal>
