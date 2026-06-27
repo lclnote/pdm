@@ -169,7 +169,11 @@
       "resolved": "Resolved",
       "rejected": "Rejected",
       "closed": "Closed"
-    }
+    },
+    "comments": "Comments",
+    "noComments": "No comments yet.",
+    "writeComment": "Write a comment...",
+    "cmDeleteConfirm": "Delete this comment?"
   },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",

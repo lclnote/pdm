@@ -169,7 +169,11 @@
       "resolved": "解決済み",
       "rejected": "却下",
       "closed": "クローズ"
-    }
+    },
+    "comments": "コメント",
+    "noComments": "コメントはまだありません。",
+    "writeComment": "コメントを入力...",
+    "cmDeleteConfirm": "このコメントを削除しますか？"
   },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",

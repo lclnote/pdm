@@ -109,3 +109,25 @@ async def create_comment(
     await db.commit()
     await db.refresh(comment)
     return IssueCommentResponse.model_validate(comment)
+
+
+@router.delete("/issues/{issue_id}/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_comment(
+    issue_id: str,
+    comment_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(IssueComment).where(
+            IssueComment.id == comment_id,
+            IssueComment.issue_id == issue_id,
+        )
+    )
+    comment = result.scalar_one_or_none()
+    if not comment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+    if comment.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot delete other user's comment")
+    await db.delete(comment)
+    await db.commit()
