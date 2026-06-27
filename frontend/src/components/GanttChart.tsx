@@ -6,30 +6,31 @@ interface GanttChartProps {
   tasks: any[]
 }
 
+// Configure Gantt plugins and properties exactly ONCE upon file load
+// to prevent multiple-initialization crashes on component remount.
+gantt.plugins({
+  critical_path: true,
+  tooltip: true
+})
+
+gantt.config.date_format = "%Y-%m-%d"
+gantt.config.highlight_critical_path = true
+gantt.config.columns = [
+  { name: "text", label: "Task Name", tree: true, width: 200 },
+  { name: "start_date", label: "Start Date", align: "center", width: 90 },
+  { name: "duration", label: "Duration (Days)", align: "center", width: 60 }
+]
+
 export default function GanttChart({ tasks }: GanttChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    const container = containerRef.current
+    if (!container) return
 
-    // Enable dhtmlx-gantt plugins
-    gantt.plugins({
-      critical_path: true,
-      tooltip: true
-    })
+    gantt.init(container)
 
-    // Configure Gantt chart
-    gantt.config.date_format = "%Y-%m-%d"
-    gantt.config.highlight_critical_path = true
-    gantt.config.columns = [
-      { name: "text", label: "Task Name", tree: true, width: 200 },
-      { name: "start_date", label: "Start Date", align: "center", width: 90 },
-      { name: "duration", label: "Duration (Days)", align: "center", width: 60 }
-    ]
-
-    gantt.init(containerRef.current)
-
-    // Convert tasks into flat array for dhtmlx-gantt format
+    // Format tree hierarchy tasks for dhtmlx-gantt
     const formattedData: any[] = []
     
     const flattenAndFormat = (items: any[]) => {
@@ -61,6 +62,7 @@ export default function GanttChart({ tasks }: GanttChartProps) {
 
     flattenAndFormat(tasks)
 
+    gantt.clearAll()
     gantt.parse({ data: formattedData, links: [] })
 
     return () => {
