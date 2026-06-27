@@ -19,10 +19,12 @@ gantt.config.smart_scales = true
 gantt.config.smart_rendering = true
 gantt.config.touch = true
 gantt.config.touch_drag = true
+gantt.config.grid_width = 250
+gantt.config.min_column_width = 40
 gantt.config.columns = [
-  { name: "text", label: "Task Name", tree: true, width: 200, min_width: 100 },
-  { name: "start_date", label: "Start", align: "center", width: 80, min_width: 60 },
-  { name: "duration", label: "Days", align: "center", width: 50, min_width: 40 }
+  { name: "text", label: "Task", tree: true, width: 150, min_width: 80 },
+  { name: "start_date", label: "Start", align: "center", width: 70, min_width: 50 },
+  { name: "duration", label: "Days", align: "center", width: 40, min_width: 30 }
 ]
 
 export default function GanttChart({ tasks }: GanttChartProps) {
@@ -75,8 +77,6 @@ export default function GanttChart({ tasks }: GanttChartProps) {
   }, [tasks])
 
   return (
-    <div className="card" style={{ padding: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
-      <div ref={containerRef} style={{ width: '100%', height: '400px', minHeight: '40vh' }} />
-    </div>
+    <div ref={containerRef} style={{ width: '100%', height: '400px', minHeight: '40vh' }} />
   )
 }
