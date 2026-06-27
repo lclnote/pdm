@@ -33,6 +33,7 @@ export default function TasksPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [name, setName] = useState('')
+  const [weight, setWeight] = useState('')
   const [assigneeId, setAssigneeId] = useState('')
   const [assigneeName, setAssigneeName] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -113,12 +114,13 @@ export default function TasksPage() {
       if (startDate) payload.start_date = startDate
       if (endDate) payload.end_date = endDate
       if (parentTaskId) payload.parent_task_id = parentTaskId
+      if (weight) payload.weight = parseFloat(weight)
       const res = await api.put(`/tasks/${showEdit.id}`, payload)
       const refresh = (items: Task[]): Task[] => items.map((t) =>
         t.id === showEdit.id ? res.data : { ...t, children: t.children ? refresh(t.children) : undefined }
       )
       setTasks(sortByStartDate(refresh(tasks)))
-      setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
+      setShowEdit(null); setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
     } catch (e: any) {
       alert(e.response?.data?.detail?.detail || t('task.updateFailed'))
     }
@@ -145,10 +147,11 @@ export default function TasksPage() {
     if (startDate) payload.start_date = startDate
     if (endDate) payload.end_date = endDate
     if (parentTaskId) payload.parent_task_id = parentTaskId
+    if (weight) payload.weight = parseFloat(weight)
     const res = await api.post(`/phases/${phaseId}/tasks`, payload)
     setTasks(sortByStartDate([...tasks, res.data]))
     setShowCreate(false)
-    setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
+    setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
   }
 
   const updateStatus = async (taskId: string, status: string) => {
@@ -170,7 +173,7 @@ export default function TasksPage() {
       {items.map((t) => {
         const warn = dateRangeWarning(t.start_date || undefined, t.end_date || undefined, phaseStartDate, phaseEndDate)
         return (
-        <div key={t.id}>
+          <div key={t.id} className="task-card" style={{ marginLeft: depth * 24 }}>
           <div
             style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '8px',
@@ -182,10 +185,11 @@ export default function TasksPage() {
           >
             <span style={{ flex: 1, fontSize: '14px' }}>
               {t.name}
+              <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{Number(t.weight).toFixed(2)}</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
             <span className={`badge ${STATUS_BADGE[t.status]}`}>{statusLabel(t.status)}</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.start_date ? t.start_date.slice(5) : ''}~{t.end_date ? t.end_date.slice(5) : ''}</span>
+            <span className="task-date" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.start_date ? t.start_date.slice(5) : ''}~{t.end_date ? t.end_date.slice(5) : ''}</span>
             <select
               value={t.status}
               onChange={(e) => { e.stopPropagation(); updateStatus(t.id, e.target.value) }}
@@ -224,7 +228,7 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
           </div>
@@ -240,7 +244,7 @@ export default function TasksPage() {
       )})()}
 
       {showEdit && (
-        <Modal title={t('task.editTask')} onClose={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.editTask')} onClose={() => { setShowEdit(null); setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={updateTask}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -271,6 +275,10 @@ export default function TasksPage() {
               <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
+            <div className="form-group">
+              <label>{t('common.weight')}</label>
+              <input type="number" step="0.1" min="0" max="99.99" value={weight} onChange={(e) => setWeight(e.target.value)} />
+            </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
               <label>{t('task.parentTask')}</label>
               <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
@@ -290,7 +298,7 @@ export default function TasksPage() {
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
@@ -298,7 +306,7 @@ export default function TasksPage() {
       )}
 
       {showCreate && (
-        <Modal title={t('task.createTask')} onClose={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.createTask')} onClose={() => { setShowCreate(false); setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={createTask}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -346,6 +354,10 @@ export default function TasksPage() {
               <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
+            <div className="form-group">
+              <label>{t('common.weight')}</label>
+              <input type="number" step="0.1" min="0" max="99.99" value={weight} onChange={(e) => setWeight(e.target.value)} />
+            </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
               <label>{t('task.parentTask')}</label>
               <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
@@ -365,7 +377,7 @@ export default function TasksPage() {
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setWeight(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
