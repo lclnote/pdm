@@ -1,0 +1,313 @@
+{
+  "app": {
+    "title": "PDM",
+    "subtitle": "项目管理开发系统"
+  },
+  "nav": {
+    "projects": "项目",
+    "dashboard": "仪表盘",
+    "phases": "阶段",
+    "risks": "风险",
+    "issues": "课题",
+    "applications": "申请",
+    "members": "成员",
+    "deliverables": "成果物",
+    "search": "搜索",
+    "logout": "退出"
+  },
+  "common": {
+    "loading": "加载中...",
+    "name": "名称",
+    "description": "说明",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "status": "状态",
+    "priority": "优先级",
+    "type": "类型",
+    "impact": "影响度",
+    "probability": "概率",
+    "assignee": "负责人",
+    "create": "创建",
+    "save": "保存",
+    "submit": "提交",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "task": "任务",
+    "period": "期间",
+    "order": "顺序",
+    "weight": "权重",
+    "level": "层级",
+    "parallel": "并行"
+  },
+  "auth": {
+    "email": "邮箱",
+    "password": "密码",
+    "signIn": "登录",
+    "loginFailed": "登录失败，请检查您的凭据。"
+  },
+  "project": {
+    "title": "项目",
+    "newProject": "+ 新建项目",
+    "editProject": "编辑项目",
+    "addPhase": "+ 添加阶段",
+    "projectPeriod": "项目期间: {{start}} ~ {{end}}",
+    "taskCount": "任务数",
+    "daysLeft": "剩余天数",
+    "pendingApps": "待处理申请",
+    "delayed": "延迟",
+    "progress": "进度",
+    "deleteConfirm": "删除此项目？",
+    "dateRangeWarnings": "⚠️ {{count}} 个日期范围警告",
+    "phaseWarnings": "{{count}} 个阶段日期警告",
+    "taskWarnings": "{{count}} 个任务日期警告",
+    "warnings": "{{count}} 个警告",
+    "progressCalcMethod": "进度计算方式",
+    "calcMethod": {
+      "task_count": "按任务数",
+      "hour": "按工时"
+    },
+    "status": {
+      "pending": "准备中",
+      "active": "进行中",
+      "closed": "已关闭"
+    }
+  },
+  "dashboard": {
+    "dateRangeWarnings": "⚠️ 日期范围警告 ({{count}})",
+    "taskWarningsAcrossPhases": "{{count}} 个任务有跨阶段日期范围警告"
+  },
+  "phase": {
+    "title": "阶段",
+    "addPhase": "+ 添加阶段",
+    "editPhase": "编辑阶段",
+    "createPhase": "添加阶段",
+    "deleteConfirm": "删除此阶段？",
+    "taskWarnings": "{{count}} 个任务有日期范围警告",
+    "gateRequest": "关口申请",
+    "gateRequestTitle": "关口申请",
+    "gateReason": "理由",
+    "gateEvidence": "证据（可选）",
+    "submitRequest": "提交申请",
+    "status": {
+      "planned": "计划中",
+      "active": "进行中",
+      "gate_waiting": "等待关口",
+      "completed": "已完成",
+      "closed": "已关闭"
+    }
+  },
+  "task": {
+    "title": "任务",
+    "addTask": "+ 添加任务",
+    "editTask": "编辑任务",
+    "createTask": "添加任务",
+    "treeView": "树形视图",
+    "ganttView": "甘特图",
+    "noTasks": "暂无任务",
+    "deleteConfirm": "删除此任务及所有子任务？",
+    "assigneeRequired": "负责人 *",
+    "parentTask": "父任务（可选）",
+    "searchUser": "搜索用户名...",
+    "searchTask": "搜索任务名...",
+    "noUsersFound": "未找到用户",
+    "noTasksFound": "未找到任务",
+    "statusLabel": "状态：",
+    "levelLabel": "层级：",
+    "periodLabel": "期间：",
+    "weightLabel": "权重：",
+    "progressLabel": "进度（%）",
+    "actualHoursLabel": "实际工时：",
+    "assigneeLabel": "负责人：",
+    "collaboratorsLabel": "协作者：",
+    "addCollaborator": "添加...",
+    "applyCompletion": "申请完成",
+    "applyCompletionTitle": "任务完成申请",
+    "applyReason": "完成备注/理由",
+    "applyEvidence": "证据（成果物链接等）",
+    "applyHold": "申请保留",
+    "applyHoldTitle": "保留申请",
+    "submitHold": "提交保留申请",
+    "applySuspend": "申请中断",
+    "applySuspendTitle": "中断申请",
+    "submitSuspend": "提交中断申请",
+    "updateFailed": "更新失败",
+    "deleteFailed": "删除失败",
+    "statusChangeFailed": "状态变更失败",
+    "status": {
+      "unaddressed": "未处理",
+      "in_progress": "处理中",
+      "awaiting_approval": "等待批准",
+      "completed": "已完成",
+      "on_hold": "保留中",
+      "suspended": "已中断"
+    }
+  },
+  "risk": {
+    "title": "风险",
+    "addRisk": "+ 添加风险",
+    "createRisk": "添加风险",
+    "editRisk": "编辑风险",
+    "deleteConfirm": "删除此风险？",
+    "high": "高",
+    "medium": "中",
+    "low": "低",
+    "critical": "严重",
+    "status": {
+      "unaddressed": "未处理",
+      "addressed": "已处理",
+      "occurred": "已发生",
+      "mitigated": "已缓解",
+      "closed": "已关闭"
+    },
+    "countermeasures": "应对措施",
+    "addCountermeasure": "+ 添加",
+    "editCountermeasure": "编辑应对措施",
+    "noCountermeasures": "暂无应对措施。",
+    "cmDeleteConfirm": "删除此应对措施？",
+    "cmDue": "期限",
+    "cmPlanned": "计划",
+    "cmInProgress": "进行中",
+    "cmCompleted": "已完成"
+  },
+  "issue": {
+    "title": "课题",
+    "addIssue": "+ 添加课题",
+    "createIssue": "添加课题",
+    "editIssue": "编辑课题",
+    "deleteConfirm": "删除此课题？",
+    "bug": "缺陷",
+    "specChange": "规格变更",
+    "request": "需求",
+    "obstacle": "障碍",
+    "other": "其他",
+    "urgent": "紧急",
+    "high": "高",
+    "medium": "中",
+    "low": "低",
+    "status": {
+      "unaddressed": "未处理",
+      "in_progress": "处理中",
+      "completed": "已完成",
+      "rejected": "已拒绝"
+    },
+    "comments": "评论",
+    "noComments": "暂无评论。",
+    "writeComment": "写评论...",
+    "cmDeleteConfirm": "删除此评论？"
+  },
+  "application": {
+    "title": "申请",
+    "noApplications": "未找到申请。",
+    "applicant": "申请人",
+    "reason": "理由",
+    "evidence": "证据",
+    "approve": "批准",
+    "reject": "拒绝",
+    "approveConfirm": "确定要批准此申请？",
+    "rejectTitle": "拒绝申请",
+    "rejectionReason": "拒绝理由",
+    "rejectSubmit": "拒绝",
+    "phaseGate": "阶段关口申请",
+    "typeSubmission": "任务提交",
+    "status": {
+      "pending": "待处理",
+      "approved": "已批准",
+      "rejected": "已拒绝"
+    }
+  },
+  "projectMember": {
+    "title": "项目成员",
+    "addMember": "+ 添加成员",
+    "addMemberTitle": "添加项目成员",
+    "noMembers": "此项目暂无成员。",
+    "role": "角色",
+    "removeConfirm": "确定要将此成员从项目中移除？",
+    "roles": {
+      "manager": "管理者",
+      "member": "成员",
+      "viewer": "浏览者"
+    }
+  },
+  "deliverable": {
+    "title": "成果物",
+    "addDeliverable": "+ 添加成果物",
+    "addDeliverableTitle": "添加成果物",
+    "noDeliverables": "此项目暂无成果物。",
+    "selectTask": "选择任务",
+    "filePath": "文件路径（本地）",
+    "fileUrl": "文件URL（远程）",
+    "version": "版本",
+    "file": "文件/路径",
+    "reviewer": "评审者",
+    "review": "评审",
+    "reviewTitle": "评审成果物",
+    "reviewStatus": "评审状态",
+    "reviewComment": "评审意见",
+    "commentPlaceholder": "请输入评审意见...",
+    "deleteConfirm": "确定要删除此成果物？",
+    "types": {
+      "document": "文档",
+      "code": "代码",
+      "design": "设计",
+      "other": "其他"
+    },
+    "status": {
+      "not_created": "未创建",
+      "pending": "待评审",
+      "approved": "已批准",
+      "rejected": "已拒绝"
+    }
+  },
+  "search": {
+    "title": "全局搜索",
+    "placeholder": "按名称、说明搜索任务、风险、课题...",
+    "noResults": "没有匹配的搜索结果。",
+    "types": {
+      "all": "全部类型",
+      "task": "任务",
+      "risk": "风险",
+      "issue": "课题"
+    },
+    "status": {
+      "all": "全部状态",
+      "pending": "待处理/进行中",
+      "completed": "已完成/已解决"
+    },
+    "assignee": {
+      "all": "全部负责人"
+    }
+  },
+  "template": {
+    "manageTemplates": "模板管理",
+    "saveAsTemplate": "保存为模板",
+    "saveTitle": "将阶段保存为模板",
+    "managerTitle": "任务模板管理",
+    "selectTemplate": "选择模板",
+    "noTemplates": "暂无已保存的模板。",
+    "selectTargetPhase": "选择目标阶段",
+    "selectTargetPhasePlaceholder": "请选择要导入的阶段",
+    "apply": "应用模板",
+    "noTasksError": "无法保存模板：此阶段没有任务。",
+    "saveSuccess": "任务模板已保存！",
+    "applySuccess": "模板任务已成功导入！",
+    "deleteConfirm": "确定要删除此任务模板？"
+  },
+  "warning": {
+    "phaseStartBeforeProject": "开始日期早于项目开始日期",
+    "phaseEndAfterProject": "结束日期晚于项目结束日期",
+    "phaseEndBeforeProjectStart": "结束日期早于项目开始日期",
+    "phaseStartAfterProjectEnd": "开始日期晚于项目结束日期",
+    "phaseEndBeforeStart": "结束日期早于开始日期",
+    "taskStartBeforePhaseStart": "任务开始日期早于阶段开始日期",
+    "taskEndAfterPhaseEnd": "任务结束日期晚于阶段结束日期",
+    "taskEndBeforePhaseStart": "任务结束日期早于阶段开始日期",
+    "taskStartAfterPhaseEnd": "任务开始日期晚于阶段结束日期",
+    "taskEndBeforeStart": "任务结束日期早于开始日期",
+    "taskWarnings": "{{count}} 个任务有日期范围警告",
+    "summary": "⚠️ {{count}} 个警告"
+  },
+  "dateRange": {
+    "format": "{{start}} ~ {{end}}"
+  }
+}

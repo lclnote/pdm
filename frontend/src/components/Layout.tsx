@@ -17,7 +17,10 @@ export default function Layout() {
 
   const closeSidebar = () => setSidebarOpen(false)
 
-  const toggleLang = () => i18n.changeLanguage(i18n.language === 'ja' ? 'en' : 'ja')
+  const toggleLang = () => {
+    const next = i18n.language === 'ja' ? 'en' : i18n.language === 'en' ? 'zh' : 'ja'
+    i18n.changeLanguage(next)
+  }
 
   return (
     <div className="layout">
@@ -41,7 +44,7 @@ export default function Layout() {
         <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', marginBottom: '8px' }}>{user.name}</div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn btn-sm" onClick={toggleLang}>{i18n.language === 'ja' ? 'EN' : 'JP'}</button>
+            <button className="btn btn-sm" onClick={toggleLang}>{i18n.language === 'ja' ? 'EN' : i18n.language === 'zh' ? 'JP' : '中'}</button>
             <button className="btn btn-sm" onClick={handleLogout}>{t('nav.logout')}</button>
           </div>
         </div>
