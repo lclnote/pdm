@@ -232,7 +232,7 @@ export default function IssuesPage() {
                   {filteredUsers.length === 0 ? <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No users found</div> : filteredUsers.map((u) => (
                     <div key={u.id} onClick={() => { setAssigneeId(u.id); setAssigneeName(u.name); setShowUserDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: assigneeId === u.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = assigneeId === u.id ? '#e8f0fe' : undefined)}>
+                      onMouseLeave={(e) => (e.currentTarget.style.background = assigneeId === u.id ? '#e8f0fe' : '')}>
                       {u.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{u.email}</span>
                     </div>
                   ))}
@@ -285,7 +285,7 @@ export default function IssuesPage() {
                   {filteredUsers.length === 0 ? <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No users found</div> : filteredUsers.map((u) => (
                     <div key={u.id} onClick={() => { setAssigneeId(u.id); setAssigneeName(u.name); setShowUserDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: assigneeId === u.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = assigneeId === u.id ? '#e8f0fe' : undefined)}>
+                      onMouseLeave={(e) => (e.currentTarget.style.background = assigneeId === u.id ? '#e8f0fe' : '')}>
                       {u.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{u.email}</span>
                     </div>
                   ))}
