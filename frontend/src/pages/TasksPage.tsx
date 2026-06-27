@@ -349,6 +349,7 @@ export default function TasksPage() {
             <span style={{ flex: 1, fontSize: '14px' }}>
               {task.name || 'Untitled'}
               <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{task.weight != null ? Number(task.weight).toFixed(2) : '0.00'}</span>
+              <span style={{ fontSize: '10px', marginLeft: '4px', verticalAlign: 'middle', color: 'var(--text-secondary)' }}>{task.progress ?? 0}%</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
             <select
@@ -364,12 +365,6 @@ export default function TasksPage() {
             </select>
           </div>
           {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
-          <div style={{ marginLeft: depth * 24 + 8, marginBottom: '2px', fontSize: '10px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <div className="progress-bar" style={{ flex: 1, maxWidth: '100px', height: '4px' }}>
-              <div className="progress-bar-fill" style={{ width: `${task.progress ?? 0}%`, height: '100%' }} />
-            </div>
-            <span>{task.progress ?? 0}%</span>
-          </div>
           {task.children && renderTaskTree(task.children, depth + 1)}
         </div>
       )})}
