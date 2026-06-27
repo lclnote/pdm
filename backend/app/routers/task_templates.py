@@ -73,10 +73,12 @@ async def apply_template(
     async def insert_tasks_recursive(tasks_list, parent_id=None):
         for t_data in tasks_list:
             task = Task(
+                project_id=phase.project_id,
                 phase_id=phase.id,
                 parent_task_id=parent_id,
                 name=t_data.get("name"),
                 description=t_data.get("description"),
+                task_level=t_data.get("task_level", "root" if not parent_id else "subtask"),
                 weight=t_data.get("weight", 1.0),
                 estimated_hours=t_data.get("estimated_hours"),
                 status="not_started",
