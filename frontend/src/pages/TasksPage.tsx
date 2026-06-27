@@ -368,6 +368,7 @@ export default function TasksPage() {
             <div className="progress-bar" style={{ flex: 1, maxWidth: '100px', height: '4px' }}>
               <div className="progress-bar-fill" style={{ width: `${task.progress ?? 0}%`, height: '100%' }} />
             </div>
+            <span>{task.progress ?? 0}%</span>
           </div>
           {task.children && renderTaskTree(task.children, depth + 1)}
         </div>
