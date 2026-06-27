@@ -117,8 +117,9 @@ export default function TasksPage() {
   const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]))
 
   useEffect(() => {
-    if (!selectedTask) { setCollaborators([]); return }
+    if (!selectedTask) { setCollaborators([]); setTaskDeliverables([]); return }
     api.get(`/tasks/${selectedTask.id}/collaborators`).then((res) => setCollaborators(res.data)).catch(() => {})
+    api.get(`/tasks/${selectedTask.id}/deliverables`).then((res) => setTaskDeliverables(res.data)).catch(() => {})
   }, [selectedTask])
 
   const [showEdit, setShowEdit] = useState<Task | null>(null)
@@ -126,6 +127,14 @@ export default function TasksPage() {
   const [applyReason, setApplyReason] = useState('')
   const [applyEvidence, setApplyEvidence] = useState('')
   const [collaborators, setCollaborators] = useState<{ id: string; user_id: string }[]>([])
+  const [taskDeliverables, setTaskDeliverables] = useState<any[]>([])
+  const [showAddDlModal, setShowAddDlModal] = useState(false)
+  const [dlName, setDlName] = useState('')
+  const [dlDescription, setDlDescription] = useState('')
+  const [dlType, setDlType] = useState('document')
+  const [dlFilePath, setDlFilePath] = useState('')
+  const [dlFileUrl, setDlFileUrl] = useState('')
+  const [dlVersion, setDlVersion] = useState('1.0')
   const [collaboratorName, setCollaboratorName] = useState('')
   const [showCollabDropdown, setShowCollabDropdown] = useState(false)
   const collabRef = useRef<HTMLDivElement>(null)
@@ -221,6 +230,25 @@ export default function TasksPage() {
     } catch {
       alert('Application failed')
     }
+  }
+
+  const handleCreateDl = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedTask) return
+    try {
+      const payload = {
+        name: dlName,
+        description: dlDescription || undefined,
+        type: dlType,
+        file_path: dlFilePath || undefined,
+        file_url: dlFileUrl || undefined,
+        version: dlVersion,
+      }
+      const res = await api.post(`/tasks/${selectedTask.id}/deliverables`, payload)
+      setTaskDeliverables([...taskDeliverables, res.data])
+      setShowAddDlModal(false)
+      setDlName(''); setDlDescription(''); setDlType('document'); setDlFilePath(''); setDlFileUrl(''); setDlVersion('1.0')
+    } catch { alert('Create deliverable failed') }
   }
 
   const renderTaskTree = (items: Task[], depth = 0) => (
@@ -330,6 +358,37 @@ export default function TasksPage() {
                 )}
               </div>
             </div>
+          </div>
+          <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '12px', fontSize: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <strong>{t('deliverable.title')}</strong>
+              <button className="btn btn-sm" style={{ fontSize: '11px', padding: '2px 6px' }} onClick={() => {
+                setDlName(''); setDlDescription(''); setDlType('document'); setDlFilePath(''); setDlFileUrl(''); setDlVersion('1.0'); setShowAddDlModal(true)
+              }}>{t('deliverable.addDeliverable')}</button>
+            </div>
+            {taskDeliverables.length === 0 ? (
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t('deliverable.noDeliverables')}</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+                {taskDeliverables.map((d) => (
+                  <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '13px' }}>
+                    <div>
+                      <strong>{d.name}</strong> <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>({t(`deliverable.types.${d.type}`)})</span>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                        {d.file_url ? (
+                          <a href={d.file_url} target="_blank" rel="noreferrer" className="link">{d.file_url}</a>
+                        ) : d.file_path ? (
+                          <code>{d.file_path}</code>
+                        ) : ''}
+                        <span className={`badge ${d.status === 'approved' ? 'badge-completed' : d.status === 'rejected' ? 'badge-danger' : 'badge-pending'}`} style={{ marginLeft: '6px', fontSize: '10px', padding: '1px 5px' }}>
+                          {t(`deliverable.status.${d.status}`)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {detailWarn && <div style={{ fontSize: '13px', color: '#e37400', marginTop: '8px' }}>⚠️ {t(detailWarn)}</div>}
         </div>
@@ -498,6 +557,52 @@ export default function TasksPage() {
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => setShowApplyModal(null)}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.submit')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {showAddDlModal && selectedTask && (
+        <Modal title={t('deliverable.addDeliverableTitle')} onClose={() => setShowAddDlModal(false)}>
+          <form onSubmit={handleCreateDl}>
+            <div className="form-group">
+              <label>{t('common.name')} *</label>
+              <input value={dlName} onChange={(e) => setDlName(e.target.value)} required />
+            </div>
+
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <textarea value={dlDescription} onChange={(e) => setDlDescription(e.target.value)} rows={3} />
+            </div>
+
+            <div className="form-group">
+              <label>{t('common.type')} *</label>
+              <select value={dlType} onChange={(e) => setDlType(e.target.value)}>
+                <option value="document">{t('deliverable.types.document')}</option>
+                <option value="code">{t('deliverable.types.code')}</option>
+                <option value="design">{t('deliverable.types.design')}</option>
+                <option value="other">{t('deliverable.types.other')}</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.filePath')}</label>
+              <input value={dlFilePath} onChange={(e) => setDlFilePath(e.target.value)} placeholder="src/components/..." />
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.fileUrl')}</label>
+              <input value={dlFileUrl} onChange={(e) => setDlFileUrl(e.target.value)} placeholder="https://github.com/..." />
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.version')}</label>
+              <input value={dlVersion} onChange={(e) => setDlVersion(e.target.value)} required />
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => setShowAddDlModal(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>

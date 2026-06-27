@@ -47,6 +47,16 @@ export default function DeliverablesPage() {
   const [reviewStatus, setReviewStatus] = useState('approved')
   const [reviewComment, setReviewComment] = useState('')
 
+  // Edit form states
+  const [showEdit, setShowEdit] = useState<Deliverable | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editType, setEditType] = useState('document')
+  const [editFilePath, setEditFilePath] = useState('')
+  const [editFileUrl, setEditFileUrl] = useState('')
+  const [editVersion, setEditVersion] = useState('1.0')
+  const [editStatus, setEditStatus] = useState('not_created')
+
   useEffect(() => {
     if (!projectId) return
     api.get('/users').then((res) => setUsers(res.data)).catch(() => {})
@@ -90,6 +100,25 @@ export default function DeliverablesPage() {
       setShowCreate(false)
       setDlName(''); setDlDescription(''); setDlType('document'); setDlFilePath(''); setDlFileUrl(''); setDlVersion('1.0'); setSelectedTaskId('')
     } catch { alert('Create failed') }
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!showEdit) return
+    try {
+      const payload = {
+        name: editName,
+        description: editDescription,
+        type: editType,
+        file_path: editFilePath || undefined,
+        file_url: editFileUrl || undefined,
+        version: editVersion,
+        status: editStatus,
+      }
+      const res = await api.put(`/deliverables/${showEdit.id}`, payload)
+      setDeliverables(deliverables.map((d) => d.id === showEdit.id ? res.data : d))
+      setShowEdit(null)
+    } catch { alert('Update failed') }
   }
 
   const handleDelete = async (id: string) => {
@@ -187,6 +216,9 @@ export default function DeliverablesPage() {
                         {t('deliverable.review')}
                       </button>
                     )}
+                    <button className="btn btn-sm" onClick={() => { setShowEdit(d); setEditName(d.name); setEditDescription(d.description || ''); setEditType(d.type); setEditFilePath(d.file_path || ''); setEditFileUrl(d.file_url || ''); setEditVersion(d.version); setEditStatus(d.status) }}>
+                      {t('common.edit')}
+                    </button>
                     <button className="btn btn-sm" style={{ color: 'var(--danger, #e53e3e)' }} onClick={() => handleDelete(d.id)}>
                       {t('common.delete')}
                     </button>
@@ -273,6 +305,62 @@ export default function DeliverablesPage() {
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => setShowReview(null)}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.submit')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {showEdit && (
+        <Modal title={t('deliverable.addDeliverableTitle')} onClose={() => setShowEdit(null)}>
+          <form onSubmit={handleUpdate}>
+            <div className="form-group">
+              <label>{t('common.name')} *</label>
+              <input value={editName} onChange={(e) => setEditName(e.target.value)} required />
+            </div>
+
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} />
+            </div>
+
+            <div className="form-group">
+              <label>{t('common.type')} *</label>
+              <select value={editType} onChange={(e) => setEditType(e.target.value)}>
+                <option value="document">{t('deliverable.types.document')}</option>
+                <option value="code">{t('deliverable.types.code')}</option>
+                <option value="design">{t('deliverable.types.design')}</option>
+                <option value="other">{t('deliverable.types.other')}</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.filePath')}</label>
+              <input value={editFilePath} onChange={(e) => setEditFilePath(e.target.value)} placeholder="src/components/..." />
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.fileUrl')}</label>
+              <input value={editFileUrl} onChange={(e) => setEditFileUrl(e.target.value)} placeholder="https://github.com/..." />
+            </div>
+
+            <div className="form-group">
+              <label>{t('deliverable.version')}</label>
+              <input value={editVersion} onChange={(e) => setEditVersion(e.target.value)} required />
+            </div>
+
+            <div className="form-group">
+              <label>{t('common.status')} *</label>
+              <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
+                <option value="not_created">{t('deliverable.status.not_created')}</option>
+                <option value="pending">{t('deliverable.status.pending')}</option>
+                <option value="approved">{t('deliverable.status.approved')}</option>
+                <option value="rejected">{t('deliverable.status.rejected')}</option>
+              </select>
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => setShowEdit(null)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
         </Modal>
