@@ -185,29 +185,29 @@ export default function TasksPage() {
 
   const renderTaskTree = (items: Task[], depth = 0) => (
     <div style={{ marginLeft: depth * 24 }}>
-      {items.map((t) => {
-        const warn = dateRangeWarning(t.start_date || undefined, t.end_date || undefined, phaseStartDate, phaseEndDate)
+      {items.map((task) => {
+        const warn = dateRangeWarning(task.start_date || undefined, task.end_date || undefined, phaseStartDate, phaseEndDate)
         return (
-          <div key={t.id} className="task-card" style={{ marginLeft: depth * 24 }}>
+          <div key={task.id} className="task-card" style={{ marginLeft: depth * 24 }}>
           <div
             style={{
               display: 'flex', alignItems: 'center', gap: '8px', padding: '8px',
               borderBottom: '1px solid var(--border)', cursor: 'pointer',
-              background: selectedTask?.id === t.id ? '#e8f0fe' : undefined,
+              background: selectedTask?.id === task.id ? '#e8f0fe' : undefined,
               borderLeft: warn ? '3px solid var(--warning)' : undefined,
             }}
-            onClick={() => setSelectedTask(t)}
+            onClick={() => setSelectedTask(task)}
           >
             <span style={{ flex: 1, fontSize: '14px' }}>
-              {t.name}
-              <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{Number(t.weight).toFixed(2)}</span>
+              {task.name || 'Untitled'}
+              <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{task.weight != null ? Number(task.weight).toFixed(2) : '0.00'}</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <span className={`badge ${STATUS_BADGE[t.status]}`}>{statusLabel(t.status)}</span>
-            <span className="task-date" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.start_date ? t.start_date.slice(5) : ''}~{t.end_date ? t.end_date.slice(5) : ''}</span>
+            <span className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}>{task.status ? statusLabel(task.status) : ''}</span>
+            <span className="task-date" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{task.start_date ? task.start_date.slice(5) : ''}~{task.end_date ? task.end_date.slice(5) : ''}</span>
             <select
-              value={t.status}
-              onChange={(e) => { e.stopPropagation(); updateStatus(t.id, e.target.value) }}
+              value={task.status || 'not_started'}
+              onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
               onClick={(e) => e.stopPropagation()}
               style={{ width: 'auto', fontSize: '12px', padding: '2px 4px' }}
             >
@@ -217,7 +217,7 @@ export default function TasksPage() {
             </select>
           </div>
           {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
-          {t.children && renderTaskTree(t.children, depth + 1)}
+          {task.children && renderTaskTree(task.children, depth + 1)}
         </div>
       )})}
     </div>
