@@ -64,6 +64,11 @@
     "calcMethod": {
       "task_count": "タスク数基準",
       "hour": "工数基準"
+    },
+    "status": {
+      "pending": "準備中",
+      "active": "進行中",
+      "closed": "クローズ"
     }
   },
   "dashboard": {

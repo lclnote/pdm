@@ -64,6 +64,11 @@
     "calcMethod": {
       "task_count": "By Task Count",
       "hour": "By Hours"
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "closed": "Closed"
     }
   },
   "dashboard": {

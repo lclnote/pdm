@@ -26,6 +26,7 @@ export default function ProjectsPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [progressCalcMethod, setProgressCalcMethod] = useState('task_count')
+  const [status, setStatus] = useState('pending')
   const navigate = useNavigate()
 
   useEffect(() => { loadProjects() }, [])
@@ -73,7 +74,7 @@ export default function ProjectsPage() {
   }
 
   const openEdit = (p: Project) => {
-    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date); setProgressCalcMethod(p.progress_calc_method || 'task_count')
+    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date); setProgressCalcMethod(p.progress_calc_method || 'task_count'); setStatus(p.status || 'pending')
     setShowEdit(p)
   }
 
@@ -82,7 +83,7 @@ export default function ProjectsPage() {
     try {
       await api.post('/projects', { name, description, start_date: startDate, end_date: endDate, progress_calc_method: progressCalcMethod })
       setShowCreate(false)
-      setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count')
+      setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count'); setStatus('pending')
       loadProjects()
     } catch (e) { console.error(e) }
   }
@@ -91,8 +92,8 @@ export default function ProjectsPage() {
     e.preventDefault()
     if (!showEdit) return
     try {
-      await api.put(`/projects/${showEdit.id}`, { name, description, start_date: startDate, end_date: endDate, progress_calc_method: progressCalcMethod })
-      setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count')
+      await api.put(`/projects/${showEdit.id}`, { name, description, start_date: startDate, end_date: endDate, progress_calc_method: progressCalcMethod, status })
+      setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count'); setStatus('pending')
       loadProjects()
     } catch (e) { console.error(e) }
   }
@@ -112,7 +113,7 @@ export default function ProjectsPage() {
 
   const statusBadge = (status: string) => {
     const cls = status === 'active' ? 'badge-active' : status === 'closed' ? 'badge-completed' : 'badge-pending'
-    return <span className={`badge ${cls}`}>{status}</span>
+    return <span className={`badge ${cls}`}>{t(`project.status.${status}`, status)}</span>
   }
 
   const totalWarnings = Object.values(warnings).reduce((s, w) => s + w.phaseCount + w.taskCount, 0)
@@ -196,7 +197,7 @@ export default function ProjectsPage() {
       )}
 
       {showEdit && (
-        <Modal title={t('project.editProject')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count') }}>
+        <Modal title={t('project.editProject')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count'); setStatus('pending') }}>
           <form onSubmit={updateProject}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -221,8 +222,16 @@ export default function ProjectsPage() {
                 <option value="hour">{t('project.calcMethod.hour')}</option>
               </select>
             </div>
+            <div className="form-group">
+              <label>{t('common.status')}</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option value="pending">{t('project.status.pending')}</option>
+                <option value="active">{t('project.status.active')}</option>
+                <option value="closed">{t('project.status.closed')}</option>
+              </select>
+            </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count'); setStatus('pending') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
