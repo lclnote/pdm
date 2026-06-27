@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import { Dashboard } from '../types'
+import GanttChart from '../components/GanttChart'
 
 function taskDateWarning(start?: string, end?: string, pStart?: string, pEnd?: string): string | null {
   if (!start && !end) return null
@@ -20,7 +21,9 @@ export default function ProjectDashboardPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<Dashboard | null>(null)
   const [phases, setPhases] = useState<any[]>([])
+  const [phaseTasks, setPhaseTasks] = useState<Record<string, any[]>>({})
   const [projDates, setProjDates] = useState({ start: '', end: '' })
+  const [progressCalcMethod, setProgressCalcMethod] = useState('task_count')
   const [taskWarns, setTaskWarns] = useState<Record<string, number>>({})
 
   useEffect(() => {
@@ -28,6 +31,7 @@ export default function ProjectDashboardPage() {
     api.get(`/projects/${projectId}/dashboard`).then((res) => setData(res.data))
     api.get(`/projects/${projectId}`).then((res) => {
       setProjDates({ start: res.data.start_date || '', end: res.data.end_date || '' })
+      setProgressCalcMethod(res.data.progress_calc_method || 'task_count')
     }).catch(() => {})
     api.get(`/projects/${projectId}/phases`).then((res) => {
       const phs = res.data
@@ -38,10 +42,13 @@ export default function ProjectDashboardPage() {
         return a.start_date < b.start_date ? -1 : 1
       })
       setPhases(phs)
+      
       const warns: Record<string, number> = {}
+      const tasksMap: Record<string, any[]> = {}
       Promise.all(phs.map(async (ph: any) => {
         try {
           const tRes = await api.get(`/phases/${ph.id}/tasks`)
+          tasksMap[ph.id] = tRes.data
           let count = 0
           for (const t of tRes.data) {
             if (t.start_date || t.end_date) {
@@ -50,7 +57,10 @@ export default function ProjectDashboardPage() {
           }
           if (count > 0) warns[ph.id] = count
         } catch {}
-      })).then(() => setTaskWarns({ ...warns }))
+      })).then(() => {
+        setPhaseTasks(tasksMap)
+        setTaskWarns({ ...warns })
+      })
     }).catch(() => {})
   }, [projectId])
 
@@ -74,6 +84,61 @@ export default function ProjectDashboardPage() {
 
   const uniqueWarnings = dateWarnings.filter((w, i, a) => a.findIndex((x) => x.id === w.id) === i)
   const totalTaskWarns = Object.values(taskWarns).reduce((s, c) => s + c, 0)
+
+  const getPhaseProgress = (phaseId: string) => {
+    const tasksList = phaseTasks[phaseId] || []
+    if (tasksList.length === 0) return 0
+
+    const getLeaves = (items: any[]): any[] => {
+      return items.flatMap(t => t.children && t.children.length > 0 ? getLeaves(t.children) : [t])
+    }
+    const leaves = getLeaves(tasksList)
+    if (leaves.length === 0) return 0
+
+    if (progressCalcMethod === 'hour') {
+      const totalEstimated = leaves.reduce((sum, t) => sum + (t.estimated_hours || 0), 0)
+      if (totalEstimated === 0) return 0
+      
+      const totalActual = leaves.reduce((sum, t) => {
+        if (t.status === 'completed') {
+          return sum + (t.actual_hours || t.estimated_hours || 0)
+        }
+        return sum
+      }, 0)
+      return Math.round((totalActual / totalEstimated) * 100)
+    } else {
+      const totalWeight = leaves.reduce((sum, t) => sum + (Number(t.weight) || 1.0), 0)
+      if (totalWeight === 0) return 0
+
+      const completedWeight = leaves.reduce((sum, t) => {
+        if (t.status === 'completed') {
+          return sum + (Number(t.weight) || 1.0)
+        }
+        return sum
+      }, 0)
+      return Math.round((completedWeight / totalWeight) * 100)
+    }
+  }
+
+  const getGanttTasks = () => {
+    const formatted: any[] = []
+    phases.forEach(ph => {
+      const phData = phases.find(p => p.id === ph.id)
+      formatted.push({
+        id: `phase-${ph.id}`,
+        name: ph.name,
+        start_date: phData?.start_date || undefined,
+        end_date: phData?.end_date || undefined,
+        status: ph.status,
+        parent_task_id: undefined,
+        children: (phaseTasks[ph.id] || []).map(t => ({
+          ...t,
+          parent_task_id: t.parent_task_id || `phase-${ph.id}`
+        }))
+      })
+    })
+    return formatted
+  }
 
   return (
     <div>
@@ -157,8 +222,9 @@ export default function ProjectDashboardPage() {
                   {t(`phase.status.${ph.status}`, ph.status)}
                 </span>
               </div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                {t('common.task')}: {ph.completed_tasks}/{ph.total_tasks}
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{t('common.task')}: {ph.completed_tasks}/{ph.total_tasks}</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t('project.progress')}: {getPhaseProgress(ph.id)}%</span>
               </div>
               {phData?.start_date && phData?.end_date && (
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
@@ -171,6 +237,13 @@ export default function ProjectDashboardPage() {
           )
         })}
       </div>
+
+      <h2 style={{ marginTop: '24px' }}>{t('task.ganttView')}</h2>
+      {phases.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>{t('task.noTasks')}</div>
+      ) : (
+        <GanttChart tasks={getGanttTasks()} />
+      )}
     </div>
   )
 }
