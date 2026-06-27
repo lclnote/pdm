@@ -118,7 +118,10 @@ async def update_task(
     task = result.scalar_one_or_none()
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    from uuid import UUID as UUIDType
     for field, value in data.model_dump(exclude_unset=True).items():
+        if field == "phase_id" and value is not None:
+            value = UUIDType(value)
         setattr(task, field, value)
     await db.commit()
     await db.refresh(task)

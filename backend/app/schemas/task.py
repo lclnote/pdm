@@ -28,6 +28,7 @@ class TaskUpdate(BaseModel):
     actual_hours: Optional[float] = None
     weight: Optional[float] = None
     progress: Optional[int] = None
+    phase_id: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     sort_order: Optional[int] = None

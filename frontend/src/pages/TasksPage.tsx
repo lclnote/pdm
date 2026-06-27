@@ -46,6 +46,8 @@ export default function TasksPage() {
   const [users, setUsers] = useState<User[]>([])
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [viewMode, setViewMode] = useState<'tree' | 'gantt'>('tree')
+  const [phases, setPhases] = useState<{ id: string; name: string }[]>([])
+  const [selectedPhaseId, setSelectedPhaseId] = useState('')
   const [phaseStartDate, setPhaseStartDate] = useState('')
   const [phaseEndDate, setPhaseEndDate] = useState('')
   const userRef = useRef<HTMLDivElement>(null)
@@ -76,6 +78,7 @@ export default function TasksPage() {
   useEffect(() => {
     if (!projectId || !phaseId) return
     api.get(`/projects/${projectId}/phases`).then((res) => {
+      setPhases(res.data)
       const ph = res.data.find((p: any) => p.id === phaseId)
       if (ph) { setPhaseStartDate(ph.start_date || ''); setPhaseEndDate(ph.end_date || '') }
     }).catch(() => {})
@@ -149,6 +152,7 @@ export default function TasksPage() {
       if (weight) payload.weight = parseFloat(weight)
       if (taskProgress) payload.progress = parseInt(taskProgress, 10)
       if (actualHours) payload.actual_hours = parseFloat(actualHours)
+      if (selectedPhaseId) payload.phase_id = selectedPhaseId
       const res = await api.put(`/tasks/${showEdit.id}`, payload)
       const refresh = (items: Task[]): Task[] => items.map((t) =>
         t.id === showEdit.id ? res.data : { ...t, children: t.children ? refresh(t.children) : undefined }
@@ -315,7 +319,7 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setTaskProgress(String(selectedTask.progress ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : ''); setSelectedPhaseId(selectedTask.phase_id || '') }}>{t('common.edit')}</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
           </div>
@@ -426,6 +430,14 @@ export default function TasksPage() {
               )}
             </div>
             <div className="form-group">
+              <label>{t('nav.phases')}</label>
+              <select value={selectedPhaseId} onChange={(e) => setSelectedPhaseId(e.target.value)}>
+                {phases.map((ph) => (
+                  <option key={ph.id} value={ph.id}>{ph.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
               <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
@@ -464,7 +476,7 @@ export default function TasksPage() {
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName(''); setSelectedPhaseId('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
