@@ -8,6 +8,7 @@ import Modal from '../components/Modal'
 interface Issue {
   id: string
   name: string
+  description?: string
   type: string
   priority: string
   status: string
@@ -21,6 +22,7 @@ export default function IssuesPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [showEdit, setShowEdit] = useState<Issue | null>(null)
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [type, setType] = useState('bug')
   const [priority, setPriority] = useState('medium')
   const [status, setStatus] = useState('unaddressed')
@@ -59,22 +61,23 @@ export default function IssuesPage() {
     e.preventDefault()
     if (!projectId) return
     const payload: any = { name, type, priority }
+    if (description) payload.description = description
     if (assigneeId) payload.assignee_id = assigneeId
     const res = await api.post(`/projects/${projectId}/issues`, payload)
     setIssues([res.data, ...issues])
     setShowCreate(false)
-    setName(''); setType('bug'); setPriority('medium'); setAssigneeId(''); setAssigneeName('')
+    setName(''); setDescription(''); setType('bug'); setPriority('medium'); setAssigneeId(''); setAssigneeName('')
   }
 
   const updateIssue = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!showEdit) return
     try {
-      const payload: any = { name, type, priority, status }
+      const payload: any = { name, description, type, priority, status }
       if (assigneeId) payload.assignee_id = assigneeId
       const res = await api.put(`/issues/${showEdit.id}`, payload)
       setIssues(issues.map((i) => (i.id === showEdit.id ? res.data : i)))
-      setShowEdit(null); setName(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('')
+      setShowEdit(null); setName(''); setDescription(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('')
     } catch { alert('Update failed') }
   }
 
@@ -109,7 +112,7 @@ export default function IssuesPage() {
           {issues.map((i) => (
             <tr key={i.id}>
               <td style={{ whiteSpace: 'nowrap' }}>
-                <button className="btn btn-sm" onClick={() => { setShowEdit(i); setName(i.name); setType(i.type); setPriority(i.priority); setStatus(i.status); setAssigneeId(i.assignee_id || ''); setAssigneeName(userMap[i.assignee_id || ''] || '') }}>{t('common.edit')}</button>
+                <button className="btn btn-sm" onClick={() => { setShowEdit(i); setName(i.name); setDescription(i.description || ''); setType(i.type); setPriority(i.priority); setStatus(i.status); setAssigneeId(i.assignee_id || ''); setAssigneeName(userMap[i.assignee_id || ''] || '') }}>{t('common.edit')}</button>
                 <button className="btn btn-sm" style={{ color: 'var(--danger, #e53e3e)' }} onClick={() => deleteIssue(i.id)}>{t('common.delete')}</button>
               </td>
               <td data-label={t('common.name')}>{i.name}</td>
@@ -124,11 +127,15 @@ export default function IssuesPage() {
       </div>
 
       {showCreate && (
-        <Modal title={t('issue.createIssue')} onClose={() => setShowCreate(false)}>
+        <Modal title={t('issue.createIssue')} onClose={() => { setShowCreate(false); setName(''); setDescription(''); setType('bug'); setPriority('medium'); setAssigneeId(''); setAssigneeName('') }}>
           <form onSubmit={createIssue}>
             <div className="form-group">
               <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </div>
             <div className="form-group" ref={userRef} style={{ position: 'relative' }}>
               <label>{t('common.assignee')}</label>
@@ -173,11 +180,15 @@ export default function IssuesPage() {
       )}
 
       {showEdit && (
-        <Modal title={t('issue.editIssue')} onClose={() => { setShowEdit(null); setName(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('') }}>
+        <Modal title={t('issue.editIssue')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('') }}>
           <form onSubmit={updateIssue}>
             <div className="form-group">
               <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </div>
             <div className="form-group" ref={userRef} style={{ position: 'relative' }}>
               <label>{t('common.assignee')}</label>
@@ -222,7 +233,7 @@ export default function IssuesPage() {
               </select>
             </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setType('bug'); setPriority('medium'); setStatus('unaddressed'); setAssigneeId(''); setAssigneeName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
