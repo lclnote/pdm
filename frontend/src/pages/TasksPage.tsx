@@ -459,7 +459,7 @@ export default function TasksPage() {
             </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
               <label>{t('task.parentTask')}</label>
-              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); if (!e.target.value) { setStartDate(phaseStartDate); setEndDate(phaseEndDate) } setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
               {showParentDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredTasks.length === 0 ? (
@@ -546,7 +546,7 @@ export default function TasksPage() {
             </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
               <label>{t('task.parentTask')}</label>
-              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); if (!e.target.value) { setStartDate(phaseStartDate); setEndDate(phaseEndDate) } setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
               {showParentDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredTasks.length === 0 ? (
