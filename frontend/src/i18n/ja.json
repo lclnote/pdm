@@ -11,6 +11,7 @@
     "issues": "課題",
     "applications": "申請管理",
     "members": "メンバー",
+    "deliverables": "成果物",
     "logout": "ログアウト"
   },
   "common": {
@@ -218,6 +219,36 @@
       "manager": "管理者",
       "member": "メンバー",
       "viewer": "閲覧者"
+    }
+  },
+  "deliverable": {
+    "title": "成果物管理",
+    "addDeliverable": "+ 成果物追加",
+    "addDeliverableTitle": "成果物追加",
+    "noDeliverables": "このプロジェクトには成果物がありません。",
+    "selectTask": "タスクを選択してください",
+    "filePath": "ファイルパス（ローカル）",
+    "fileUrl": "ファイルURL（リモート）",
+    "version": "バージョン",
+    "file": "ファイル / パス",
+    "reviewer": "評価者",
+    "review": "レビュー",
+    "reviewTitle": "成果物レビュー",
+    "reviewStatus": "判定",
+    "reviewComment": "レビューコメント",
+    "commentPlaceholder": "コメントを入力してください...",
+    "deleteConfirm": "この成果物を削除してもよろしいですか？",
+    "types": {
+      "document": "ドキュメント",
+      "code": "ソースコード",
+      "design": "デザイン",
+      "other": "その他"
+    },
+    "status": {
+      "not_created": "未作成",
+      "pending": "レビュー待ち",
+      "approved": "承認済み",
+      "rejected": "却下済み"
     }
   },
   "warning": {
