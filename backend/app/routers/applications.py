@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.models.application import Application
+from app.models.task import Task
+from app.models.phase import Phase
 from app.models.user import User
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationApprove, ApplicationReject
 from app.services.auth import get_current_user
@@ -17,8 +19,28 @@ async def create_application(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    resolved_project_id = None
+    if data.task_id:
+        task_res = await db.execute(select(Task).where(Task.id == data.task_id))
+        task = task_res.scalar_one_or_none()
+        if not task:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+        phase_res = await db.execute(select(Phase).where(Phase.id == task.phase_id))
+        phase = phase_res.scalar_one_or_none()
+        if not phase:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phase of the task not found")
+        resolved_project_id = phase.project_id
+    elif data.phase_id:
+        phase_res = await db.execute(select(Phase).where(Phase.id == data.phase_id))
+        phase = phase_res.scalar_one_or_none()
+        if not phase:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Phase not found")
+        resolved_project_id = phase.project_id
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Either task_id or phase_id is required")
+
     app = Application(
-        project_id=data.task_id or data.phase_id,
+        project_id=resolved_project_id,
         task_id=data.task_id,
         phase_id=data.phase_id,
         application_type=data.application_type,
