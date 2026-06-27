@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import sqlalchemy as sa
 
 from app.core.database import engine, Base
 from app.routers import routers
@@ -11,6 +12,10 @@ from app.routers import routers
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Add progress column to tasks table if not exists (migration for new field)
+        await conn.execute(
+            sa.text("ALTER TABLE tasks ADD COLUMN IF NOT EXISTS progress INTEGER NOT NULL DEFAULT 0")
+        )
     yield
     await engine.dispose()
 
