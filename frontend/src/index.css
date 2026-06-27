@@ -347,8 +347,8 @@ th {
   .modal {
     width: 100%;
     max-width: 100%;
-    max-height: 100vh;
-    height: 100vh;
+    max-height: 100dvh;
+    height: 100dvh;
     border-radius: 0;
     padding: 16px;
   }
@@ -364,6 +364,9 @@ th {
   }
 
   /* responsive card table for issues/similar */
+  .responsive-table {
+    white-space: normal;
+  }
   .responsive-table thead {
     display: none;
   }

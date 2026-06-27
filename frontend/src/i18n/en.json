@@ -106,9 +106,19 @@
     "title": "Risks",
     "addRisk": "+ Add Risk",
     "createRisk": "Add Risk",
+    "editRisk": "Edit Risk",
+    "deleteConfirm": "Delete this risk?",
     "high": "High",
     "medium": "Medium",
-    "low": "Low"
+    "low": "Low",
+    "critical": "Critical",
+    "status": {
+      "unaddressed": "Unaddressed",
+      "addressed": "Addressed",
+      "occurred": "Occurred",
+      "mitigated": "Mitigated",
+      "closed": "Closed"
+    }
   },
   "issue": {
     "title": "Issues",

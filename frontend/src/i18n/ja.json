@@ -106,9 +106,19 @@
     "title": "リスク",
     "addRisk": "+ リスク追加",
     "createRisk": "リスク追加",
+    "editRisk": "リスク編集",
+    "deleteConfirm": "このリスクを削除しますか？",
     "high": "高",
     "medium": "中",
-    "low": "低"
+    "low": "低",
+    "critical": "重大",
+    "status": {
+      "unaddressed": "未対応",
+      "addressed": "対応済み",
+      "occurred": "発生",
+      "mitigated": "緩和済み",
+      "closed": "クローズ"
+    }
   },
   "issue": {
     "title": "課題",
