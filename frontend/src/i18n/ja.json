@@ -135,8 +135,7 @@
     "deleteFailed": "削除に失敗しました",
     "statusChangeFailed": "状態変更に失敗しました",
     "status": {
-      "not_started": "未着手",
-      "ready": "着手可能",
+      "unaddressed": "未対応",
       "in_progress": "対応中",
       "awaiting_approval": "承認待ち",
       "completed": "完了",
@@ -189,9 +188,8 @@
     "status": {
       "unaddressed": "未対応",
       "in_progress": "対応中",
-      "resolved": "解決済み",
-      "rejected": "却下",
-      "closed": "クローズ"
+      "completed": "完了",
+      "rejected": "却下"
     },
     "comments": "コメント",
     "noComments": "コメントはまだありません。",

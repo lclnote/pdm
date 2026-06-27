@@ -160,7 +160,7 @@ export default function IssuesPage() {
               <td data-label={t('common.name')}>{i.name}</td>
               <td data-label={t('common.type')}><span className="badge badge-pending">{t(`issue.${i.type}`, i.type)}</span></td>
               <td data-label={t('common.priority')}><span className={`badge ${i.priority === 'urgent' ? 'badge-danger' : 'badge-active'}`}>{t(`issue.${i.priority}`, i.priority)}</span></td>
-              <td data-label={t('common.status')}><span className={`badge ${i.status === 'in_progress' ? 'badge-active' : i.status === 'resolved' || i.status === 'closed' ? 'badge-completed' : i.status === 'rejected' ? 'badge-danger' : 'badge-pending'}`}>{t(`issue.status.${i.status}`, i.status)}</span></td>
+              <td data-label={t('common.status')}><span className={`badge ${i.status === 'in_progress' ? 'badge-active' : i.status === 'completed' || i.status === 'resolved' || i.status === 'closed' ? 'badge-completed' : i.status === 'rejected' ? 'badge-danger' : 'badge-pending'}`}>{t(`issue.status.${i.status}`, i.status)}</span></td>
               <td data-label={t('common.assignee')} style={{ color: 'var(--text-secondary)' }}>{userMap[i.assignee_id || ''] || '-'}</td>
             </tr>
           ))}
@@ -314,7 +314,7 @@ export default function IssuesPage() {
             <div className="form-group">
               <label>{t('common.status')}</label>
               <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                {['unaddressed', 'in_progress', 'resolved', 'rejected', 'closed'].map((s) => (
+                {['unaddressed', 'in_progress', 'completed', 'rejected'].map((s) => (
                   <option key={s} value={s}>{t(`issue.status.${s}`)}</option>
                 ))}
               </select>

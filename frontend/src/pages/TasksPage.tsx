@@ -16,10 +16,9 @@ function dateRangeWarning(start?: string, end?: string, parentStart?: string, pa
   return null
 }
 
-const STATUS_OPTIONS = ['not_started', 'ready', 'in_progress', 'awaiting_approval', 'completed', 'on_hold', 'suspended']
+const STATUS_OPTIONS = ['unaddressed', 'in_progress', 'awaiting_approval', 'completed', 'on_hold', 'suspended']
 const STATUS_BADGE: Record<string, string> = {
-  not_started: 'badge-pending',
-  ready: 'badge-active',
+  unaddressed: 'badge-pending',
   in_progress: 'badge-active',
   awaiting_approval: 'badge-pending',
   completed: 'badge-completed',

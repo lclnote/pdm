@@ -135,8 +135,7 @@
     "deleteFailed": "Delete failed",
     "statusChangeFailed": "Status change failed",
     "status": {
-      "not_started": "Not Started",
-      "ready": "Ready",
+      "unaddressed": "Unaddressed",
       "in_progress": "In Progress",
       "awaiting_approval": "Awaiting Approval",
       "completed": "Completed",
@@ -189,9 +188,8 @@
     "status": {
       "unaddressed": "Unaddressed",
       "in_progress": "In Progress",
-      "resolved": "Resolved",
-      "rejected": "Rejected",
-      "closed": "Closed"
+      "completed": "Completed",
+      "rejected": "Rejected"
     },
     "comments": "Comments",
     "noComments": "No comments yet.",
