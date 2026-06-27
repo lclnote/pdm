@@ -56,7 +56,12 @@
     "dateRangeWarnings": "⚠️ {{count}}件の日付範囲警告",
     "phaseWarnings": "{{count}}件のフェーズ日付警告",
     "taskWarnings": "{{count}}件のタスク日付警告",
-    "warnings": "{{count}}件の警告"
+    "warnings": "{{count}}件の警告",
+    "progressCalcMethod": "進捗計算方法",
+    "calcMethod": {
+      "task_count": "タスク数基準",
+      "hour": "工数基準"
+    }
   },
   "dashboard": {
     "dateRangeWarnings": "⚠️ 日付範囲警告 ({{count}}件)",

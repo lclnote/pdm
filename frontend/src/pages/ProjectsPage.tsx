@@ -25,6 +25,7 @@ export default function ProjectsPage() {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [progressCalcMethod, setProgressCalcMethod] = useState('task_count')
   const navigate = useNavigate()
 
   useEffect(() => { loadProjects() }, [])
@@ -72,16 +73,16 @@ export default function ProjectsPage() {
   }
 
   const openEdit = (p: Project) => {
-    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date)
+    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date); setProgressCalcMethod(p.progress_calc_method || 'task_count')
     setShowEdit(p)
   }
 
   const createProject = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await api.post('/projects', { name, description, start_date: startDate, end_date: endDate })
+      await api.post('/projects', { name, description, start_date: startDate, end_date: endDate, progress_calc_method: progressCalcMethod })
       setShowCreate(false)
-      setName(''); setDescription(''); setStartDate(''); setEndDate('')
+      setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count')
       loadProjects()
     } catch (e) { console.error(e) }
   }
@@ -90,8 +91,8 @@ export default function ProjectsPage() {
     e.preventDefault()
     if (!showEdit) return
     try {
-      await api.put(`/projects/${showEdit.id}`, { name, description, start_date: startDate, end_date: endDate })
-      setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('')
+      await api.put(`/projects/${showEdit.id}`, { name, description, start_date: startDate, end_date: endDate, progress_calc_method: progressCalcMethod })
+      setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count')
       loadProjects()
     } catch (e) { console.error(e) }
   }
@@ -161,7 +162,7 @@ export default function ProjectsPage() {
       </div>
 
       {showCreate && (
-        <Modal title={t('project.newProject')} onClose={() => setShowCreate(false)}>
+        <Modal title={t('project.newProject')} onClose={() => { setShowCreate(false); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count') }}>
           <form onSubmit={createProject}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -179,6 +180,13 @@ export default function ProjectsPage() {
               <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
             </div>
+            <div className="form-group">
+              <label>{t('project.progressCalcMethod')}</label>
+              <select value={progressCalcMethod} onChange={(e) => setProgressCalcMethod(e.target.value)}>
+                <option value="task_count">{t('project.calcMethod.task_count')}</option>
+                <option value="hour">{t('project.calcMethod.hour')}</option>
+              </select>
+            </div>
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => setShowCreate(false)}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.create')}</button>
@@ -188,7 +196,7 @@ export default function ProjectsPage() {
       )}
 
       {showEdit && (
-        <Modal title={t('project.editProject')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
+        <Modal title={t('project.editProject')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count') }}>
           <form onSubmit={updateProject}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -206,8 +214,15 @@ export default function ProjectsPage() {
               <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
             </div>
+            <div className="form-group">
+              <label>{t('project.progressCalcMethod')}</label>
+              <select value={progressCalcMethod} onChange={(e) => setProgressCalcMethod(e.target.value)}>
+                <option value="task_count">{t('project.calcMethod.task_count')}</option>
+                <option value="hour">{t('project.calcMethod.hour')}</option>
+              </select>
+            </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setProgressCalcMethod('task_count') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>

@@ -56,7 +56,12 @@
     "dateRangeWarnings": "⚠️ {{count}} date range warning(s) across projects",
     "phaseWarnings": "{{count}} phase(s) with date warnings",
     "taskWarnings": "{{count}} task(s) with date warnings",
-    "warnings": "{{count}} warning(s)"
+    "warnings": "{{count}} warning(s)",
+    "progressCalcMethod": "Progress Calculation",
+    "calcMethod": {
+      "task_count": "By Task Count",
+      "hour": "By Hours"
+    }
   },
   "dashboard": {
     "dateRangeWarnings": "⚠️ Date Range Warnings ({{count}})",

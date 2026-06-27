@@ -26,7 +26,7 @@
 |---|------|---------|----------|----------|
 | 6 | **タスク協力者** | 🔶 | ❌ | TaskCollaboratorルーター追加（モデル・スキーマ既存）→ TasksPageに協力者追加UI |
 | 7 | **リスク対応策** | 🔶 | ❌ | RiskCountermeasureルーター追加（モデル・スキーマ既存）→ RisksPageに対応策UI |
-| 8 | **進捗計算方式切替** | ✅ | 🔶 | Project編集画面にprogress_calc_method選択追加（task_count/hour） |
+| 8 | **進捗計算方式切替** | ✅ | ✅ | Project編集画面にprogress_calc_method選択追加（task_count/hour） |
 
 ## Level 3: 中程度（新規ページ、APIは概ね既存）
 
@@ -82,7 +82,7 @@
 |-------|------|------|
 | LoginPage | ✅ | JWT認証、localStorage保存 |
 | Layout (Sidebar) | ✅ | レスポンシブ、ハンバーガーメニュー |
-| ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート |
+| ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート + 進捗計算方式選択 |
 | ProjectDashboardPage | ✅ | 進捗バー + 統計 + フェーズ一覧 + 日付警告 |
 | PhasesPage | ✅ | CRUD + 日付警告 + 開始日ソート + ゲート申請 + ステータス管理 |
 | TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 + 親タスク自動補完 + 開始日ソート + 重み表示/編集 + 実績工数 + モバイルカード |
