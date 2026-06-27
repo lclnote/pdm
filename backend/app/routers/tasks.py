@@ -152,16 +152,6 @@ async def update_task_status(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
     previous = task.status
-    if not is_transition_allowed(previous, data.status):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={
-                "error": "invalid_transition",
-                "message": f"State '{previous}' to '{data.status}' is not allowed",
-                "current_status": previous,
-                "allowed_transitions": [s for s in ["ready", "in_progress", "awaiting_approval", "completed", "on_hold", "suspended"] if is_transition_allowed(previous, s)],
-            }
-        )
     task.status = data.status
     await db.commit()
     await db.refresh(task)
