@@ -82,10 +82,10 @@
 |-------|------|------|
 | LoginPage | ✅ | JWT認証、localStorage保存 |
 | Layout (Sidebar) | ✅ | レスポンシブ、ハンバーガーメニュー |
-| ProjectsPage | ✅ | CRUD + 日付警告 |
+| ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート |
 | ProjectDashboardPage | ✅ | 進捗バー + 統計 + フェーズ一覧 + 日付警告 |
-| PhasesPage | ✅ | CRUD + 日付警告 |
-| TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 |
+| PhasesPage | ✅ | CRUD + 日付警告 + 開始日ソート |
+| TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 + 親タスク自動補完 + 開始日ソート |
 | RisksPage | 🔶 | 一覧 + 作成のみ（編集・削除・対応策なし） |
 | IssuesPage | ✅ | CRUD + 担当者選択 + 多言語化 + モバイルカード表示 |
 | ApplicationsPage | ❌ | 未作成 |
