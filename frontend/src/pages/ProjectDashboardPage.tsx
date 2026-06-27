@@ -224,7 +224,10 @@ export default function ProjectDashboardPage() {
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{t('common.task')}: {ph.completed_tasks}/{ph.total_tasks}</span>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{t('project.progress')}: {getPhaseProgress(ph.id)}%</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{getPhaseProgress(ph.id)}%</span>
+              </div>
+              <div className="progress-bar" style={{ marginTop: '6px', marginBottom: '8px', height: '6px' }}>
+                <div className="progress-bar-fill" style={{ width: `${getPhaseProgress(ph.id)}%`, height: '100%' }} />
               </div>
               {phData?.start_date && phData?.end_date && (
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
