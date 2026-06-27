@@ -30,7 +30,7 @@ async def create_deliverable(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    deliverable = Deliverable(task_id=task_id, **data.model_dump())
+    deliverable = Deliverable(task_id=task_id, status="pending", **data.model_dump())
     db.add(deliverable)
     await db.commit()
     await db.refresh(deliverable)
