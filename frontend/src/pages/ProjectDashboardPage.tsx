@@ -153,8 +153,8 @@ export default function ProjectDashboardPage() {
                   {ph.name}
                   {(warn || tCount > 0) && <span title={warn ? t(warn.msg) : t('warning.taskWarnings', { count: tCount })} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
                 </strong>
-                <span className={`badge ${ph.status === 'completed' ? 'badge-completed' : ph.status === 'active' ? 'badge-active' : 'badge-pending'}`}>
-                  {ph.status}
+                <span className={`badge ${ph.status === 'completed' || ph.status === 'closed' ? 'badge-completed' : ph.status === 'active' ? 'badge-active' : 'badge-pending'}`}>
+                  {t(`phase.status.${ph.status}`, ph.status)}
                 </span>
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
