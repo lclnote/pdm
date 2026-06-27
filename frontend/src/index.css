@@ -363,6 +363,45 @@ th {
     white-space: nowrap;
   }
 
+  /* responsive card table for issues/similar */
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tbody, .responsive-table tr, .responsive-table td {
+    display: block;
+  }
+  .responsive-table tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .responsive-table td {
+    border: none;
+    padding: 6px 0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .responsive-table td:first-child {
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 0;
+  }
+  .responsive-table td:first-child::before {
+    display: none;
+  }
+
   .progress-stat {
     flex-wrap: wrap;
     gap: 12px;

@@ -114,6 +114,8 @@
     "title": "Issues",
     "addIssue": "+ Add Issue",
     "createIssue": "Add Issue",
+    "editIssue": "Edit Issue",
+    "deleteConfirm": "Delete this issue?",
     "bug": "Bug",
     "specChange": "Spec Change",
     "request": "Request",
@@ -122,7 +124,14 @@
     "urgent": "Urgent",
     "high": "High",
     "medium": "Medium",
-    "low": "Low"
+    "low": "Low",
+    "status": {
+      "unaddressed": "Unaddressed",
+      "in_progress": "In Progress",
+      "resolved": "Resolved",
+      "rejected": "Rejected",
+      "closed": "Closed"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",

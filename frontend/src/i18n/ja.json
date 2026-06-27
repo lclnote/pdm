@@ -114,6 +114,8 @@
     "title": "課題",
     "addIssue": "+ 課題追加",
     "createIssue": "課題追加",
+    "editIssue": "課題編集",
+    "deleteConfirm": "この課題を削除しますか？",
     "bug": "バグ",
     "specChange": "仕様変更",
     "request": "要望",
@@ -122,7 +124,14 @@
     "urgent": "緊急",
     "high": "高",
     "medium": "中",
-    "low": "低"
+    "low": "低",
+    "status": {
+      "unaddressed": "未対応",
+      "in_progress": "対応中",
+      "resolved": "解決済み",
+      "rejected": "却下",
+      "closed": "クローズ"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",
