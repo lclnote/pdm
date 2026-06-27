@@ -229,7 +229,7 @@ export default function ProjectDashboardPage() {
                     } catch { alert('Status change failed') }
                   }}
                   className={`badge ${ph.status === 'completed' || ph.status === 'closed' ? 'badge-completed' : ph.status === 'active' ? 'badge-active' : 'badge-pending'}`}
-                  style={{ cursor: 'pointer', border: 'none', fontSize: '11px', padding: '2px 8px', outline: 'none' }}
+                  style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px' }}
                 >
                   {['planned', 'active', 'gate_waiting', 'completed', 'closed'].map((s) => (
                     <option key={s} value={s}>{t(`phase.status.${s}`)}</option>

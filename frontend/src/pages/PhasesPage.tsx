@@ -324,7 +324,7 @@ export default function PhasesPage() {
                       } catch { alert('Status change failed') }
                     }}
                     className={`badge ${phaseStatusBadge(ph.status)}`}
-                    style={{ cursor: 'pointer', border: 'none', fontSize: '11px', padding: '2px 8px', outline: 'none' }}
+                    style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px' }}
                   >
                     {['planned', 'active', 'gate_waiting', 'completed', 'closed'].map((s) => (
                       <option key={s} value={s}>{t(`phase.status.${s}`)}</option>

@@ -260,17 +260,7 @@ export default function TasksPage() {
               <span style={{ fontSize: '10px', marginLeft: '4px', verticalAlign: 'middle', color: 'var(--text-secondary)' }}>{task.progress ?? 0}%</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <select
-              value={task.status || 'not_started'}
-              onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
-              onClick={(e) => e.stopPropagation()}
-              className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}
-              style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px' }}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{statusLabel(s)}</option>
-              ))}
-            </select>
+            <span className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`} style={{ fontSize: '10px' }}>{task.status ? statusLabel(task.status) : ''}</span>
           </div>
           {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
           {task.children && renderTaskTree(task.children, depth + 1)}
@@ -318,7 +308,18 @@ export default function TasksPage() {
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
-            <div><strong>{t('task.statusLabel')}</strong> {statusLabel(selectedTask.status)}</div>
+            <div><strong>{t('task.statusLabel')}</strong>
+              <select
+                value={selectedTask.status}
+                onChange={(e) => { updateStatus(selectedTask.id, e.target.value) }}
+                className={`badge ${selectedTask.status ? STATUS_BADGE[selectedTask.status] : 'badge-pending'}`}
+                style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px', marginLeft: '4px' }}
+              >
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>{statusLabel(s)}</option>
+                ))}
+              </select>
+            </div>
             <div><strong>{t('task.levelLabel')}</strong> {selectedTask.task_level}</div>
             <div><strong>{t('task.periodLabel')}</strong> {selectedTask.start_date || '...'} ~ {selectedTask.end_date || '...'}</div>
             <div><strong>{t('task.weightLabel')}</strong> {selectedTask.weight}</div>
