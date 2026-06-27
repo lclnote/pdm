@@ -39,7 +39,8 @@
     "order": "Order",
     "weight": "Weight",
     "level": "Level",
-    "parallel": "Parallel"
+    "parallel": "Parallel",
+    "date": "Date"
   },
   "auth": {
     "email": "Email",

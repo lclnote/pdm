@@ -39,7 +39,8 @@
     "order": "顺序",
     "weight": "权重",
     "level": "层级",
-    "parallel": "并行"
+    "parallel": "并行",
+    "date": "日期"
   },
   "auth": {
     "email": "邮箱",

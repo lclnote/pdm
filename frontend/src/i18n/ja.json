@@ -39,7 +39,8 @@
     "order": "順序",
     "weight": "重み",
     "level": "階層",
-    "parallel": "並列"
+    "parallel": "並列",
+    "date": "日付"
   },
   "auth": {
     "email": "メールアドレス",
