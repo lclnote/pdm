@@ -29,6 +29,12 @@ export default function ProjectDashboardPage() {
     }).catch(() => {})
     api.get(`/projects/${projectId}/phases`).then((res) => {
       const phs = res.data
+      phs.sort((a: any, b: any) => {
+        if (!a.start_date && !b.start_date) return 0
+        if (!a.start_date) return 1
+        if (!b.start_date) return -1
+        return a.start_date < b.start_date ? -1 : 1
+      })
       setPhases(phs)
       const warns: Record<string, number> = {}
       Promise.all(phs.map(async (ph: any) => {

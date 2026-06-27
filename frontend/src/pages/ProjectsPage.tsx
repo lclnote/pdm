@@ -31,6 +31,12 @@ export default function ProjectsPage() {
     try {
       const res = await api.get('/projects')
       const projs: Project[] = res.data
+      projs.sort((a, b) => {
+        if (!a.start_date && !b.start_date) return 0
+        if (!a.start_date) return 1
+        if (!b.start_date) return -1
+        return a.start_date < b.start_date ? -1 : 1
+      })
       setProjects(projs)
       const warns: Record<string, { phaseCount: number; taskCount: number }> = {}
       await Promise.all(projs.map(async (p) => {

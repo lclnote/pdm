@@ -48,6 +48,12 @@ export default function PhasesPage() {
         api.get(`/projects/${projectId}`),
       ])
       const phs: Phase[] = phRes.data
+      phs.sort((a, b) => {
+        if (!a.start_date && !b.start_date) return 0
+        if (!a.start_date) return 1
+        if (!b.start_date) return -1
+        return a.start_date < b.start_date ? -1 : 1
+      })
       setPhases(phs)
       setProjStartDate(projRes.data.start_date || '')
       setProjEndDate(projRes.data.end_date || '')

@@ -45,15 +45,26 @@ export default function TasksPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [parentTaskId, setParentTaskId] = useState('')
+  const [parentTaskName, setParentTaskName] = useState('')
+  const [showParentDropdown, setShowParentDropdown] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [phaseStartDate, setPhaseStartDate] = useState('')
   const [phaseEndDate, setPhaseEndDate] = useState('')
   const userRef = useRef<HTMLDivElement>(null)
+  const parentRef = useRef<HTMLDivElement>(null)
+
+  const sortByStartDate = (items: Task[]): Task[] =>
+    [...items].sort((a, b) => {
+      if (!a.start_date && !b.start_date) return 0
+      if (!a.start_date) return 1
+      if (!b.start_date) return -1
+      return a.start_date < b.start_date ? -1 : 1
+    }).map((t) => ({ ...t, children: t.children ? sortByStartDate(t.children) : undefined }))
 
   useEffect(() => {
     if (!phaseId) return
-    api.get(`/phases/${phaseId}/tasks`).then((res) => setTasks(res.data))
+    api.get(`/phases/${phaseId}/tasks`).then((res) => setTasks(sortByStartDate(res.data)))
   }, [phaseId])
 
   useEffect(() => {
@@ -73,10 +84,23 @@ export default function TasksPage() {
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false)
       }
+      if (parentRef.current && !parentRef.current.contains(e.target as Node)) {
+        setShowParentDropdown(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  const flattenTasks = (items: Task[]): { id: string; name: string; level: string }[] =>
+    items.flatMap((t) => [{ id: t.id, name: t.name, level: t.task_level }, ...(t.children ? flattenTasks(t.children) : [])])
+
+  const allTasks = flattenTasks(tasks)
+  const taskMap = Object.fromEntries(allTasks.map((t) => [t.id, t.name]))
+
+  const filteredTasks = allTasks.filter((t) =>
+    t.name.toLowerCase().includes(parentTaskName.toLowerCase())
+  )
 
   const filteredUsers = users.filter((u) =>
     u.name.toLowerCase().includes(assigneeName.toLowerCase())
@@ -93,12 +117,13 @@ export default function TasksPage() {
       const payload: any = { name, assignee_id: assigneeId }
       if (startDate) payload.start_date = startDate
       if (endDate) payload.end_date = endDate
+      if (parentTaskId) payload.parent_task_id = parentTaskId
       const res = await api.put(`/tasks/${showEdit.id}`, payload)
       const refresh = (items: Task[]): Task[] => items.map((t) =>
         t.id === showEdit.id ? res.data : { ...t, children: t.children ? refresh(t.children) : undefined }
       )
-      setTasks(refresh(tasks))
-      setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId('')
+      setTasks(sortByStartDate(refresh(tasks)))
+      setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
     } catch (e: any) {
       alert(e.response?.data?.detail?.detail || 'Update failed')
     }
@@ -111,7 +136,7 @@ export default function TasksPage() {
     try {
       await api.delete(`/tasks/${taskId}`)
       const remove = (items: Task[]): Task[] => items.filter((t) => t.id !== taskId).map((t) => ({ ...t, children: t.children ? remove(t.children) : undefined }))
-      setTasks(remove(tasks))
+      setTasks(sortByStartDate(remove(tasks)))
       setSelectedTask(null)
     } catch (e: any) {
       alert(e.response?.data?.detail?.detail || 'Delete failed')
@@ -126,9 +151,9 @@ export default function TasksPage() {
     if (endDate) payload.end_date = endDate
     if (parentTaskId) payload.parent_task_id = parentTaskId
     const res = await api.post(`/phases/${phaseId}/tasks`, payload)
-    setTasks([...tasks, res.data])
+    setTasks(sortByStartDate([...tasks, res.data]))
     setShowCreate(false)
-    setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId('')
+    setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
   }
 
   const updateStatus = async (taskId: string, status: string) => {
@@ -204,7 +229,7 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={detailWarn} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || '') }}>Edit</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>Edit</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>Delete</button>
             </div>
           </div>
@@ -220,13 +245,13 @@ export default function TasksPage() {
       )})()}
 
       {showEdit && (
-        <Modal title="Edit Task" onClose={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId('') }}>
+        <Modal title="Edit Task" onClose={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={updateTask}>
             <div className="form-group">
               <label>Name</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
-            <div className="form-group" style={{ position: 'relative' }}>
+            <div className="form-group" style={{ position: 'relative' }} ref={userRef}>
               <label>Assignee *</label>
               <input value={assigneeName} onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }} onFocus={() => setShowUserDropdown(true)} placeholder="Search user name..." required />
               {showUserDropdown && (
@@ -251,13 +276,26 @@ export default function TasksPage() {
               <label>End Date</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label>Parent Task ID (optional)</label>
-              <input value={parentTaskId} onChange={(e) => setParentTaskId(e.target.value)} placeholder="Leave empty for root task" />
+            <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
+              <label>Parent Task (optional)</label>
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder="Search task name..." />
+              {showParentDropdown && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                  {filteredTasks.length === 0 ? (
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No tasks found</div>
+                  ) : filteredTasks.map((t) => (
+                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = parentTaskId === t.id ? '#e8f0fe' : undefined)}>
+                      {t.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{t.level}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId('') }}>Cancel</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>Cancel</button>
               <button type="submit" className="btn btn-primary">Save</button>
             </div>
           </form>
@@ -265,7 +303,7 @@ export default function TasksPage() {
       )}
 
       {showCreate && (
-        <Modal title="Add Task" onClose={() => { setShowCreate(false); setStartDate(''); setEndDate('') }}>
+        <Modal title="Add Task" onClose={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={createTask}>
             <div className="form-group">
               <label>Name</label>
@@ -313,13 +351,26 @@ export default function TasksPage() {
               <label>End Date</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label>Parent Task ID (optional)</label>
-              <input value={parentTaskId} onChange={(e) => setParentTaskId(e.target.value)} placeholder="Leave empty for root task" />
+            <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
+              <label>Parent Task (optional)</label>
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder="Search task name..." />
+              {showParentDropdown && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                  {filteredTasks.length === 0 ? (
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No tasks found</div>
+                  ) : filteredTasks.map((t) => (
+                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = parentTaskId === t.id ? '#e8f0fe' : undefined)}>
+                      {t.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{t.level}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>Cancel</button>
               <button type="submit" className="btn btn-primary">Create</button>
             </div>
           </form>
