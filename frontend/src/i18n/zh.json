@@ -13,6 +13,7 @@
     "members": "成员",
     "deliverables": "成果物",
     "search": "搜索",
+    "users": "用户",
     "holidays": "日历",
     "logout": "退出"
   },
@@ -306,6 +307,22 @@
     "workingDay": "工作日",
     "namePlaceholder": "例如：元旦、公司纪念日",
     "deleteConfirm": "确定要删除此日期设置？"
+  },
+  "user": {
+    "title": "用户",
+    "addUser": "+ 添加用户",
+    "addUserTitle": "添加用户",
+    "editUserTitle": "编辑用户",
+    "noUsers": "未找到用户。",
+    "role": "角色",
+    "deleteConfirm": "确定要删除此用户？",
+    "roles": {
+      "system_admin": "系统管理员",
+      "pm": "项目经理",
+      "sub_leader": "副主管",
+      "worker": "作业者",
+      "viewer": "浏览者"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "开始日期早于项目开始日期",

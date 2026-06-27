@@ -13,6 +13,7 @@
     "members": "メンバー",
     "deliverables": "成果物",
     "search": "横断検索",
+    "users": "ユーザー",
     "holidays": "カレンダー",
     "logout": "ログアウト"
   },
@@ -306,6 +307,22 @@
     "workingDay": "稼働日",
     "namePlaceholder": "例：年末年始、創立記念日",
     "deleteConfirm": "この日付設定を削除してもよろしいですか？"
+  },
+  "user": {
+    "title": "ユーザー",
+    "addUser": "+ ユーザー追加",
+    "addUserTitle": "ユーザー追加",
+    "editUserTitle": "ユーザー編集",
+    "noUsers": "ユーザーが見つかりません。",
+    "role": "ロール",
+    "deleteConfirm": "このユーザーを削除してもよろしいですか？",
+    "roles": {
+      "system_admin": "システム管理者",
+      "pm": "PM",
+      "sub_leader": "サブリーダー",
+      "worker": "作業者",
+      "viewer": "閲覧者"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",

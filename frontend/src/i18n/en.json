@@ -13,6 +13,7 @@
     "members": "Members",
     "deliverables": "Deliverables",
     "search": "Search",
+    "users": "Users",
     "holidays": "Calendar",
     "logout": "Logout"
   },
@@ -306,6 +307,22 @@
     "workingDay": "Working Day",
     "namePlaceholder": "e.g. New Year, Company Anniversary",
     "deleteConfirm": "Are you sure you want to delete this date setting?"
+  },
+  "user": {
+    "title": "Users",
+    "addUser": "+ Add User",
+    "addUserTitle": "Add User",
+    "editUserTitle": "Edit User",
+    "noUsers": "No users found.",
+    "role": "Role",
+    "deleteConfirm": "Are you sure you want to delete this user?",
+    "roles": {
+      "system_admin": "System Admin",
+      "pm": "PM",
+      "sub_leader": "Sub Leader",
+      "worker": "Worker",
+      "viewer": "Viewer"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",

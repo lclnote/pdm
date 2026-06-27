@@ -29,6 +29,7 @@ export default function Layout() {
         <h2>{t('app.title')}</h2>
         <nav onClick={closeSidebar}>
           <NavLink to="/projects" end>{t('nav.projects')}</NavLink>
+          <NavLink to="/users">{t('nav.users')}</NavLink>
           {projectId && (
             <>
               <NavLink to={`/projects/${projectId}`}>{t('nav.dashboard')}</NavLink>
