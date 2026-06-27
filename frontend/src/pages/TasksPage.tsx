@@ -104,8 +104,8 @@ export default function TasksPage() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const flattenTasks = (items: Task[]): { id: string; name: string; level: string }[] =>
-    items.flatMap((t) => [{ id: t.id, name: t.name, level: t.task_level }, ...(t.children ? flattenTasks(t.children) : [])])
+  const flattenTasks = (items: Task[]): { id: string; name: string; level: string; start_date?: string; end_date?: string }[] =>
+    items.flatMap((t) => [{ id: t.id, name: t.name, level: t.task_level, start_date: t.start_date, end_date: t.end_date }, ...(t.children ? flattenTasks(t.children) : [])])
 
   const allTasks = flattenTasks(tasks)
   const taskMap = Object.fromEntries(allTasks.map((t) => [t.id, t.name]))
@@ -292,7 +292,7 @@ export default function TasksPage() {
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className={`btn ${viewMode === 'tree' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setViewMode('tree')}>{t('task.treeView')}</button>
           <button className={`btn ${viewMode === 'gantt' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setViewMode('gantt')}>{t('task.ganttView')}</button>
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('task.addTask')}</button>
+          <button className="btn btn-primary" onClick={() => { setShowCreate(true); setStartDate(phaseStartDate); setEndDate(phaseEndDate) }}>{t('task.addTask')}</button>
         </div>
       </div>
 
@@ -465,7 +465,7 @@ export default function TasksPage() {
                   {filteredTasks.length === 0 ? (
                     <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noTasksFound')}</div>
                   ) : filteredTasks.map((t) => (
-                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
+                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false); setStartDate(t.start_date || ''); setEndDate(t.end_date || '') }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = parentTaskId === t.id ? '#e8f0fe' : '')}>
                       {t.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{t.level}</span>
@@ -552,7 +552,7 @@ export default function TasksPage() {
                   {filteredTasks.length === 0 ? (
                     <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noTasksFound')}</div>
                   ) : filteredTasks.map((t) => (
-                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
+                    <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false); setStartDate(t.start_date || ''); setEndDate(t.end_date || '') }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = parentTaskId === t.id ? '#e8f0fe' : '')}>
                       {t.name} <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{t.level}</span>
