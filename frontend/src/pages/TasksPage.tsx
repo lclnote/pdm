@@ -333,13 +333,12 @@ export default function TasksPage() {
               <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{task.weight != null ? Number(task.weight).toFixed(2) : '0.00'}</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <span className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}>{task.status ? statusLabel(task.status) : ''}</span>
-            <span className="task-date" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{task.start_date ? task.start_date.slice(5) : ''}~{task.end_date ? task.end_date.slice(5) : ''}</span>
             <select
               value={task.status || 'not_started'}
               onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
               onClick={(e) => e.stopPropagation()}
-              style={{ width: 'auto', fontSize: '12px', padding: '2px 4px' }}
+              className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}
+              style={{ cursor: 'pointer', border: 'none', fontSize: '11px', padding: '2px 8px', outline: 'none' }}
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>{statusLabel(s)}</option>
