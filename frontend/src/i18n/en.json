@@ -12,6 +12,7 @@
     "applications": "Applications",
     "members": "Members",
     "deliverables": "Deliverables",
+    "search": "Search",
     "logout": "Logout"
   },
   "common": {
@@ -249,6 +250,25 @@
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected"
+    }
+  },
+  "search": {
+    "title": "Cross-cutting Search",
+    "placeholder": "Search tasks, risks, and issues by name, description...",
+    "noResults": "No results matching your filters.",
+    "types": {
+      "all": "All Types",
+      "task": "Task",
+      "risk": "Risk",
+      "issue": "Issue"
+    },
+    "status": {
+      "all": "All Statuses",
+      "pending": "Pending / Active",
+      "completed": "Completed / Resolved"
+    },
+    "assignee": {
+      "all": "All Assignees"
     }
   },
   "warning": {

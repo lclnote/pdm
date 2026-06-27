@@ -12,6 +12,7 @@
     "applications": "申請管理",
     "members": "メンバー",
     "deliverables": "成果物",
+    "search": "横断検索",
     "logout": "ログアウト"
   },
   "common": {
@@ -249,6 +250,25 @@
       "pending": "レビュー待ち",
       "approved": "承認済み",
       "rejected": "却下済み"
+    }
+  },
+  "search": {
+    "title": "プロジェクト横断検索",
+    "placeholder": "タスク、リスク、課題の名前、説明などをキーワード検索...",
+    "noResults": "条件に一致する検索結果が見つかりませんでした。",
+    "types": {
+      "all": "すべての種類",
+      "task": "タスク",
+      "risk": "リスク",
+      "issue": "課題"
+    },
+    "status": {
+      "all": "すべての状態",
+      "pending": "対応中 / 保留中",
+      "completed": "完了 / 解決済み"
+    },
+    "assignee": {
+      "all": "すべての担当者"
     }
   },
   "warning": {
