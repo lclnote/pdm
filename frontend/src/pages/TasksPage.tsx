@@ -317,6 +317,21 @@ export default function TasksPage() {
     <div style={{ marginLeft: depth * 24 }}>
       {items.map((task) => {
         const warn = dateRangeWarning(task.start_date || undefined, task.end_date || undefined, phaseStartDate, phaseEndDate)
+        
+        const getTaskProgress = (t: Task): number => {
+          if (t.children && t.children.length > 0) {
+            const leaves = t.children.flatMap(c => c.children && c.children.length > 0 ? c.children.flatMap(gc => gc.children && gc.children.length > 0 ? [] : [gc]) : [c])
+            if (leaves.length === 0) return t.status === 'completed' ? 100 : 0
+            const totalWeight = leaves.reduce((s, l) => s + (Number(l.weight) || 1.0), 0)
+            if (totalWeight === 0) return 0
+            const completedWeight = leaves.reduce((s, l) => l.status === 'completed' ? s + (Number(l.weight) || 1.0) : s, 0)
+            return Math.round((completedWeight / totalWeight) * 100)
+          }
+          return t.status === 'completed' ? 100 : t.status === 'in_progress' ? 50 : 0
+        }
+
+        const progress = getTaskProgress(task)
+        
         return (
           <div key={task.id} className="task-card" style={{ marginLeft: depth * 24 }}>
           <div
@@ -346,6 +361,12 @@ export default function TasksPage() {
             </select>
           </div>
           {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
+          <div style={{ marginLeft: depth * 24 + 8, marginBottom: '2px', fontSize: '10px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div className="progress-bar" style={{ flex: 1, maxWidth: '100px', height: '4px' }}>
+              <div className="progress-bar-fill" style={{ width: `${progress}%`, height: '100%' }} />
+            </div>
+            <span>{progress}%</span>
+          </div>
           {task.children && renderTaskTree(task.children, depth + 1)}
         </div>
       )})}
