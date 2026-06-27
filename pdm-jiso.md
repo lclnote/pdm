@@ -17,7 +17,7 @@
 | 1 | **課題 編集・削除** | ✅ | ✅ | IssuesPageにEditモーダル・Deleteボタン・担当者選択・状態変更・説明入力・多言語化・モバイルカード表示追加 |
 | 2 | **リスク 編集・削除** | ✅ | ✅ | RisksPageにEditモーダル・Deleteボタン・ステータス管理・多言語化・モバイルカード表示追加 |
 | 3 | **タスク重み表示** | ✅ | ✅ | TasksPageの詳細パネル・ツリー・編集モーダル・作成モーダルにweight表示/編集追加、モバイルカード表示 |
-| 4 | **タスク実績工数** | ✅ | 🔶 | TasksPageの編集モーダルにactual_hours入力追加 |
+| 4 | **タスク実績工数** | ✅ | ✅ | TasksPageの詳細パネル・編集モーダル・作成モーダルにactual_hours表示/編集追加 |
 | 5 | **Phaseゲート申請ボタン** | ✅ | 🔶 | PhasesPageにGate Requestボタン追加 |
 
 ## Level 2: 簡単（新規endpoint + 既存画面拡張）
@@ -85,7 +85,7 @@
 | ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート |
 | ProjectDashboardPage | ✅ | 進捗バー + 統計 + フェーズ一覧 + 日付警告 |
 | PhasesPage | ✅ | CRUD + 日付警告 + 開始日ソート |
-| TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 + 親タスク自動補完 + 開始日ソート + 重み表示/編集 + モバイルカード |
+| TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 + 親タスク自動補完 + 開始日ソート + 重み表示/編集 + 実績工数 + モバイルカード |
 | RisksPage | ✅ | CRUD + ステータス管理 + 多言語化 + モバイルカード表示 |
 | IssuesPage | ✅ | CRUD + 担当者選択 + 説明入力 + 多言語化 + モバイルカード表示 |
 | ApplicationsPage | ❌ | 未作成 |

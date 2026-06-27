@@ -88,6 +88,7 @@
     "levelLabel": "階層:",
     "periodLabel": "期間:",
     "weightLabel": "重み:",
+    "actualHoursLabel": "実績工数:",
     "assigneeLabel": "担当者:",
     "updateFailed": "更新に失敗しました",
     "deleteFailed": "削除に失敗しました",

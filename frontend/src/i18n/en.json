@@ -88,6 +88,7 @@
     "levelLabel": "Level:",
     "periodLabel": "Period:",
     "weightLabel": "Weight:",
+    "actualHoursLabel": "Actual Hours:",
     "assigneeLabel": "Assignee:",
     "updateFailed": "Update failed",
     "deleteFailed": "Delete failed",
