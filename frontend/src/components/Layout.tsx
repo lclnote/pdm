@@ -38,6 +38,7 @@ export default function Layout() {
               <NavLink to={`/projects/${projectId}/members`}>{t('nav.members')}</NavLink>
               <NavLink to={`/projects/${projectId}/deliverables`}>{t('nav.deliverables')}</NavLink>
               <NavLink to={`/projects/${projectId}/search`}>{t('nav.search')}</NavLink>
+              <NavLink to={`/projects/${projectId}/holidays`}>{t('nav.holidays')}</NavLink>
             </>
           )}
         </nav>

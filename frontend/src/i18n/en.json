@@ -13,6 +13,7 @@
     "members": "Members",
     "deliverables": "Deliverables",
     "search": "Search",
+    "holidays": "Calendar",
     "logout": "Logout"
   },
   "common": {
@@ -292,6 +293,18 @@
     "saveSuccess": "Task template successfully saved!",
     "applySuccess": "Template tasks successfully imported!",
     "deleteConfirm": "Are you sure you want to delete this task template?"
+  },
+  "holiday": {
+    "title": "Calendar Settings",
+    "add": "+ Add",
+    "addTitle": "Add Date Setting",
+    "editTitle": "Edit Date Setting",
+    "noHolidays": "No date settings.",
+    "type": "Type",
+    "holiday": "Holiday",
+    "workingDay": "Working Day",
+    "namePlaceholder": "e.g. New Year, Company Anniversary",
+    "deleteConfirm": "Are you sure you want to delete this date setting?"
   },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",

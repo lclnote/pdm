@@ -9,6 +9,7 @@ from app.routers.issues import router as issues_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.task_collaborators import router as task_collaborators_router
 from app.routers.task_templates import router as task_templates_router
+from app.routers.holiday import router as holiday_router
 
 routers = [
     auth_router,
@@ -22,4 +23,5 @@ routers = [
     dashboard_router,
     task_collaborators_router,
     task_templates_router,
+    holiday_router,
 ]

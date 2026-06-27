@@ -13,6 +13,7 @@
     "members": "メンバー",
     "deliverables": "成果物",
     "search": "横断検索",
+    "holidays": "カレンダー",
     "logout": "ログアウト"
   },
   "common": {
@@ -292,6 +293,18 @@
     "saveSuccess": "タスクテンプレートを保存しました！",
     "applySuccess": "テンプレートタスクのインポートが完了しました！",
     "deleteConfirm": "このタスクテンプレートを削除してもよろしいですか？"
+  },
+  "holiday": {
+    "title": "カレンダー設定",
+    "add": "+ 追加",
+    "addTitle": "日付設定を追加",
+    "editTitle": "日付設定を編集",
+    "noHolidays": "日付設定はありません。",
+    "type": "種別",
+    "holiday": "休日",
+    "workingDay": "稼働日",
+    "namePlaceholder": "例：年末年始、創立記念日",
+    "deleteConfirm": "この日付設定を削除してもよろしいですか？"
   },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",
