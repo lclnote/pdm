@@ -73,12 +73,7 @@ export default function PhasesPage() {
         api.get(`/projects/${projectId}`),
       ])
       const phs: Phase[] = phRes.data
-      phs.sort((a, b) => {
-        if (!a.start_date && !b.start_date) return 0
-        if (!a.start_date) return 1
-        if (!b.start_date) return -1
-        return a.start_date < b.start_date ? -1 : 1
-      })
+      phs.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       setPhases(phs)
       setProjStartDate(projRes.data.start_date || '')
       setProjEndDate(projRes.data.end_date || '')
@@ -132,6 +127,35 @@ export default function PhasesPage() {
     } catch (e) { console.error(e) }
   }
 
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.setData('text/plain', String(index))
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault()
+    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10)
+    if (dragIndex === dropIndex) return
+
+    const updatedPhases = [...phases]
+    const [draggedItem] = updatedPhases.splice(dragIndex, 1)
+    updatedPhases.splice(dropIndex, 0, draggedItem)
+
+    const reordered = updatedPhases.map((ph, idx) => ({ ...ph, sort_order: idx + 1 }))
+    setPhases(reordered)
+
+    try {
+      await Promise.all(reordered.map((ph) => 
+        api.put(`/phases/${ph.id}`, { sort_order: ph.sort_order })
+      ))
+    } catch {
+      alert('Failed to save phase order')
+    }
+  }
+
   const formWarning = dateRangeWarning(startDate, endDate, projStartDate, projEndDate)
   const totalTaskWarns = Object.values(taskWarns).reduce((s, c) => s + c, 0)
 
@@ -154,11 +178,22 @@ export default function PhasesPage() {
       )}
 
       <div className="grid">
-        {phases.map((ph) => {
+        {phases.map((ph, index) => {
           const warn = dateRangeWarning(ph.start_date || undefined, ph.end_date || undefined, projStartDate, projEndDate)
           const tCount = taskWarns[ph.id] || 0
           return (
-            <div key={ph.id} className="card" style={(warn || tCount > 0) ? { borderLeft: '4px solid var(--warning)' } : undefined}>
+            <div
+              key={ph.id}
+              className="card"
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, index)}
+              style={{
+                cursor: 'grab',
+                borderLeft: (warn || tCount > 0) ? '4px solid var(--warning)' : undefined
+              }}
+            >
               <div style={{ cursor: 'pointer' }} onClick={() => navigate(`/projects/${projectId}/phases/${ph.id}/tasks`)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong>
