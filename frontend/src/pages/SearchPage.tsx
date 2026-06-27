@@ -109,15 +109,8 @@ export default function SearchPage() {
     // 2. Type filter
     if (selectedType !== 'all' && item.type !== selectedType) return false
 
-    // 3. Status filter
-    if (selectedStatus !== 'all') {
-      // Map statuses loosely (completed/resolved/closed vs pending/active/etc.)
-      if (selectedStatus === 'completed') {
-        if (!['completed', 'resolved', 'closed', 'addressed', 'mitigated'].includes(item.status)) return false
-      } else if (selectedStatus === 'pending') {
-        if (['completed', 'resolved', 'closed', 'addressed', 'mitigated'].includes(item.status)) return false
-      }
-    }
+    // 3. Status filter (exact match when a specific status is selected)
+    if (selectedStatus !== 'all' && item.status !== selectedStatus) return false
 
     // 4. Assignee filter
     if (selectedAssignee !== 'all' && item.assignee_id !== selectedAssignee) return false
@@ -179,8 +172,20 @@ export default function SearchPage() {
               <label style={{ fontSize: '12px', marginBottom: '4px' }}>{t('common.status')}</label>
               <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
                 <option value="all">{t('search.status.all')}</option>
-                <option value="pending">{t('search.status.pending')}</option>
-                <option value="completed">{t('search.status.completed')}</option>
+                <option value="not_started">{t('task.status.not_started')}</option>
+                <option value="ready">{t('task.status.ready')}</option>
+                <option value="in_progress">{t('task.status.in_progress')}</option>
+                <option value="awaiting_approval">{t('task.status.awaiting_approval')}</option>
+                <option value="completed">{t('task.status.completed')}</option>
+                <option value="on_hold">{t('task.status.on_hold')}</option>
+                <option value="suspended">{t('task.status.suspended')}</option>
+                <option value="unaddressed">{t('issue.status.unaddressed')}</option>
+                <option value="addressed">{t('risk.status.addressed')}</option>
+                <option value="occurred">{t('risk.status.occurred')}</option>
+                <option value="mitigated">{t('risk.status.mitigated')}</option>
+                <option value="closed">{t('issue.status.closed')}</option>
+                <option value="resolved">{t('issue.status.resolved')}</option>
+                <option value="rejected">{t('issue.status.rejected')}</option>
               </select>
             </div>
 
