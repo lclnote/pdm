@@ -15,10 +15,14 @@ gantt.plugins({
 
 gantt.config.date_format = "%Y-%m-%d"
 gantt.config.highlight_critical_path = true
+gantt.config.smart_scales = true
+gantt.config.smart_rendering = true
+gantt.config.touch = true
+gantt.config.touch_drag = true
 gantt.config.columns = [
-  { name: "text", label: "Task Name", tree: true, width: 200 },
-  { name: "start_date", label: "Start Date", align: "center", width: 90 },
-  { name: "duration", label: "Duration (Days)", align: "center", width: 60 }
+  { name: "text", label: "Task Name", tree: true, width: 200, min_width: 100 },
+  { name: "start_date", label: "Start", align: "center", width: 80, min_width: 60 },
+  { name: "duration", label: "Days", align: "center", width: 50, min_width: 40 }
 ]
 
 export default function GanttChart({ tasks }: GanttChartProps) {
@@ -71,8 +75,8 @@ export default function GanttChart({ tasks }: GanttChartProps) {
   }, [tasks])
 
   return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-      <div ref={containerRef} style={{ width: '100%', height: '400px' }} />
+    <div className="card" style={{ padding: 0, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '400px', minHeight: '40vh' }} />
     </div>
   )
 }
