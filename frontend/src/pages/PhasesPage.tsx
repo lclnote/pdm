@@ -15,10 +15,33 @@ export default function PhasesPage() {
   const [projEndDate, setProjEndDate] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [showEdit, setShowEdit] = useState<Phase | null>(null)
+  const [showGateModal, setShowGateModal] = useState<Phase | null>(null)
+  const [gateReason, setGateReason] = useState('')
+  const [gateEvidence, setGateEvidence] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [status, setStatus] = useState('')
+
+  const phaseStatusBadge = (s: string) => {
+    if (s === 'active') return 'badge-active'
+    if (s === 'completed' || s === 'closed') return 'badge-completed'
+    if (s === 'gate_waiting') return 'badge-pending'
+    return 'badge-pending'
+  }
+
+  const submitGateRequest = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!showGateModal) return
+    try {
+      await api.post(`/phases/${showGateModal.id}/gate-request`, { reason: gateReason, evidence: gateEvidence || undefined })
+      setPhases(phases.map((p) => p.id === showGateModal.id ? { ...p, status: 'gate_waiting' } : p))
+      setShowGateModal(null); setGateReason(''); setGateEvidence('')
+    } catch (e: any) {
+      alert(e.response?.data?.detail || 'Gate request failed')
+    }
+  }
 
   function dateRangeWarning(start?: string, end?: string, projStart?: string, projEnd?: string): string | null {
     if (!start && !end) return null
@@ -94,6 +117,7 @@ export default function PhasesPage() {
       const payload: any = { name, description }
       if (startDate) payload.start_date = startDate
       if (endDate) payload.end_date = endDate
+      if (status) payload.status = status
       const res = await api.put(`/phases/${showEdit.id}`, payload)
       setPhases(phases.map((p) => (p.id === showEdit.id ? res.data : p)))
       setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('')
@@ -141,8 +165,8 @@ export default function PhasesPage() {
                     {ph.name}
                     {(warn || tCount > 0) && <span title={warn || t('warning.taskWarnings', {count: tCount})} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}
                   </strong>
-                  <span className={`badge ${ph.status === 'active' ? 'badge-active' : ph.status === 'completed' ? 'badge-completed' : 'badge-pending'}`}>
-                    {ph.status}
+                  <span className={`badge ${phaseStatusBadge(ph.status)}`}>
+                    {t(`phase.status.${ph.status}`, ph.status)}
                   </span>
                 </div>
                 {ph.description && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{ph.description}</p>}
@@ -157,8 +181,11 @@ export default function PhasesPage() {
                 {tCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t('warning.taskWarnings', {count: tCount})}</div>}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
-                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); setShowEdit(ph); setName(ph.name); setDescription(ph.description || ''); setStartDate(ph.start_date || ''); setEndDate(ph.end_date || '') }}>{t('common.edit')}</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); setShowEdit(ph); setName(ph.name); setDescription(ph.description || ''); setStartDate(ph.start_date || ''); setEndDate(ph.end_date || ''); setStatus(ph.status) }}>{t('common.edit')}</button>
                 <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deletePhase(ph.id) }}>{t('common.delete')}</button>
+                {ph.status === 'active' && (
+                  <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', marginLeft: 'auto' }} onClick={(e) => { e.stopPropagation(); setShowGateModal(ph); setGateReason(''); setGateEvidence('') }}>{t('phase.gateRequest')}</button>
+                )}
               </div>
             </div>
           )
@@ -190,7 +217,7 @@ export default function PhasesPage() {
       )}
 
       {showEdit && (
-        <Modal title={t('phase.editPhase')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
+        <Modal title={t('phase.editPhase')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setStatus('') }}>
           <form onSubmit={updatePhase}>
             <div className="form-group">
               <label>{t('common.name')}</label>
@@ -208,10 +235,37 @@ export default function PhasesPage() {
               <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
+            <div className="form-group">
+              <label>{t('common.status')}</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                {['planned', 'active', 'gate_waiting', 'completed', 'closed'].map((s) => (
+                  <option key={s} value={s}>{t(`phase.status.${s}`)}</option>
+                ))}
+              </select>
+            </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate(''); setStatus('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {showGateModal && (
+        <Modal title={t('phase.gateRequestTitle')} onClose={() => { setShowGateModal(null); setGateReason(''); setGateEvidence('') }}>
+          <form onSubmit={submitGateRequest}>
+            <div className="form-group">
+              <label>{t('phase.gateReason')}</label>
+              <textarea value={gateReason} onChange={(e) => setGateReason(e.target.value)} rows={3} required />
+            </div>
+            <div className="form-group">
+              <label>{t('phase.gateEvidence')}</label>
+              <input value={gateEvidence} onChange={(e) => setGateEvidence(e.target.value)} />
+            </div>
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => { setShowGateModal(null); setGateReason(''); setGateEvidence('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('phase.submitRequest')}</button>
             </div>
           </form>
         </Modal>

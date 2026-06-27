@@ -69,7 +69,18 @@
     "createPhase": "Add Phase",
     "deleteConfirm": "Delete this phase?",
     "taskWarnings": "{{count}} task(s) with date range warnings",
-    "gateRequest": "Gate Request"
+    "gateRequest": "Gate Request",
+    "gateRequestTitle": "Gate Request",
+    "gateReason": "Reason",
+    "gateEvidence": "Evidence (optional)",
+    "submitRequest": "Submit Request",
+    "status": {
+      "planned": "Planned",
+      "active": "Active",
+      "gate_waiting": "Gate Waiting",
+      "completed": "Completed",
+      "closed": "Closed"
+    }
   },
   "task": {
     "title": "Tasks",
