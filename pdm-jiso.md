@@ -14,7 +14,7 @@
 
 | # | 機能 | Backend | Frontend | 作業内容 |
 |---|------|---------|----------|----------|
-| 1 | **課題 編集・削除** | ✅ | 🔶 | IssuesPageにEditモーダル・Deleteボタン追加 |
+| 1 | **課題 編集・削除** | ✅ | ✅ | IssuesPageにEditモーダル・Deleteボタン・担当者選択・状態変更・多言語化・モバイルカード表示追加 |
 | 2 | **リスク 編集・削除** | ✅ | 🔶 | RisksPageにEditモーダル・Deleteボタン追加 |
 | 3 | **タスク重み表示** | ✅ | 🔶 | TasksPageの詳細パネル・編集モーダルにweight表示/編集追加 |
 | 4 | **タスク実績工数** | ✅ | 🔶 | TasksPageの編集モーダルにactual_hours入力追加 |
@@ -87,7 +87,7 @@
 | PhasesPage | ✅ | CRUD + 日付警告 |
 | TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 |
 | RisksPage | 🔶 | 一覧 + 作成のみ（編集・削除・対応策なし） |
-| IssuesPage | 🔶 | 一覧 + 作成のみ（編集・削除・コメントなし） |
+| IssuesPage | ✅ | CRUD + 担当者選択 + 多言語化 + モバイルカード表示 |
 | ApplicationsPage | ❌ | 未作成 |
 | DeliverablesPage | ❌ | 未作成 |
 | MembersPage | ❌ | 未作成 |
