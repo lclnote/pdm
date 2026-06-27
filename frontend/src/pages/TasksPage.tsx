@@ -383,6 +383,11 @@ export default function TasksPage() {
                         <span className={`badge ${d.status === 'approved' ? 'badge-completed' : d.status === 'rejected' ? 'badge-danger' : 'badge-pending'}`} style={{ marginLeft: '6px', fontSize: '10px', padding: '1px 5px' }}>
                           {t(`deliverable.status.${d.status}`)}
                         </span>
+                        {d.reviewer_id && (
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                            ({t('deliverable.reviewer')}: {userMap[d.reviewer_id] || d.reviewer_id})
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
