@@ -260,7 +260,17 @@ export default function TasksPage() {
               <span style={{ fontSize: '10px', marginLeft: '4px', verticalAlign: 'middle', color: 'var(--text-secondary)' }}>{task.progress ?? 0}%</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <span className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`} style={{ fontSize: '10px' }}>{task.status ? statusLabel(task.status) : ''}</span>
+            <select
+              value={task.status || 'not_started'}
+              onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
+              onClick={(e) => e.stopPropagation()}
+              className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}
+              style={{ cursor: 'pointer', border: 'none', fontSize: '10px', padding: '2px 6px', outline: 'none', maxWidth: '85px' }}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>{statusLabel(s)}</option>
+              ))}
+            </select>
           </div>
           {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
           {task.children && renderTaskTree(task.children, depth + 1)}
