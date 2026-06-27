@@ -4,6 +4,12 @@
 
 ---
 
+## Level 0: 最優先
+
+| # | 機能 | Backend | Frontend | 作業内容 |
+|---|------|---------|----------|----------|
+| 0 | **多言語化 (i18n)** | ❌ | ❌ | react-i18next導入、全UI文字列をkey管理、en/ja対応、言語切替UI追加 |
+
 ## Level 1: 超簡単（既存画面の小修正のみ）
 
 | # | 機能 | Backend | Frontend | 作業内容 |
@@ -85,3 +91,4 @@
 | ApplicationsPage | ❌ | 未作成 |
 | DeliverablesPage | ❌ | 未作成 |
 | MembersPage | ❌ | 未作成 |
+| i18n (多言語化) | ❌ | 全UI文字列のキー管理、en/ja対応、react-i18next導入予定 |
