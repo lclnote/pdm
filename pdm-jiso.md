@@ -8,7 +8,7 @@
 
 | # | 機能 | Backend | Frontend | 作業内容 |
 |---|------|---------|----------|----------|
-| 0 | **多言語化 (i18n)** | ✅ | ✅ | react-i18next導入、全UI文字列をkey管理、en/ja対応、言語切替UI追加 |
+| 0 | **多言語化 (i18n)** | ✅ | ✅ | react-i18next導入、全UI文字列をkey管理、en/ja/zh対応、言語切替UI追加 |
 
 ## Level 1: 超簡単（既存画面の小修正のみ）
 
@@ -54,7 +54,7 @@
 | 18 | **レポート/エクスポート** | ❌ | ❌ | PDF/CSV生成API、メール配信機能 |
 | 19 | **通知機能** | ❌ | ❌ | WebSocket/DBポーリング + 通知一覧画面 |
 | 20 | **リスク→課題自動変換** | ❌ | ❌ | リスク状態="発生"時にIssue自動作成トリガー |
-| 21 | **カレンダー連携** | ❌ | ❌ | 営業日カレンダー、休日設定、稼働日計算 |
+| 21 | **カレンダー連携** | ✅ | ✅ | 営業日カレンダー、休日設定、稼働日計算 |
 | 22 | **SSO連携** | ❌ | ❌ | OAuth/OpenID Connect対応 |
 
 ---
@@ -68,27 +68,32 @@
 | Auth (JWT) | ✅ | ログイン・トークン認証 |
 | Project CRUD | ✅ | メンバー管理含む |
 | Phase CRUD | ✅ | ゲート申請含む |
-| Task CRUD | ✅ | 3階層、状態機械、依存関係 |
-| TaskCollaborator | 🔶 | モデル・スキーマのみ、ルーターなし |
+| Task CRUD | ✅ | 3階層、依存関係 |
+| TaskCollaborator | ✅ | 追加・一覧・削除エンドポイント |
 | Risk CRUD | ✅ | 優先度自動計算 |
-| RiskCountermeasure | 🔶 | モデル・スキーマのみ、ルーターなし |
+| RiskCountermeasure | ✅ | CRUDエンドポイント実装済み |
 | Issue CRUD | ✅ | コメント含む |
-| Application | ✅ | 作成・承認・却下 |
+| Application | 🔶 | エンドポイントのみ（削除予定） |
 | Deliverable CRUD | ✅ | レビュー提出含む |
 | Dashboard | ✅ | 進捗率・統計サマリー |
+| Task Template | ✅ | 保存・再帰的適用 |
+| Holiday / Calendar | ✅ | 休日設定、稼働日計算 |
 
 ### フロントエンド
 | ページ | 状態 | 備考 |
 |-------|------|------|
 | LoginPage | ✅ | JWT認証、localStorage保存 |
 | Layout (Sidebar) | ✅ | レスポンシブ、ハンバーガーメニュー |
-| ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート + 進捗計算方式選択 |
-| ProjectDashboardPage | ✅ | 進捗バー + 統計 + フェーズ一覧 + 日付警告 |
-| PhasesPage | ✅ | CRUD + 日付警告 + 開始日ソート + ゲート申請 + ステータス管理 |
-| TasksPage | ✅ | ツリー表示 + CRUD + 状態変更 + 日付警告 + 親タスク自動補完 + 開始日ソート + 重み表示/編集 + 実績工数 + モバイルカード |
-| RisksPage | ✅ | CRUD + ステータス管理 + 多言語化 + モバイルカード表示 |
-| IssuesPage | ✅ | CRUD + 担当者選択 + 説明入力 + 多言語化 + モバイルカード表示 |
-| ApplicationsPage | ❌ | 未作成 |
-| DeliverablesPage | ❌ | 未作成 |
-| MembersPage | ❌ | 未作成 |
-| i18n (多言語化) | ✅ | react-i18next導入、全UI文字列キー管理、en/ja対応、言語切替ボタン実装済み |
+| ProjectsPage | ✅ | CRUD + 日付警告 + 開始日ソート + 進捗計算方式選択 + 進捗バー |
+| ProjectDashboardPage | ✅ | 進捗バー + 統計 + フェーズ一覧 + ガントチャート + 日付警告 |
+| PhasesPage | ✅ | CRUD + 日付警告 + DnD並び替え + ゲート申請 + テンプレート保存/適用 |
+| TasksPage | ✅ | ツリー/ガント切替 + CRUD + 状態変更 + 担当者/協力者管理 + 成果物連携 |
+| RisksPage | ✅ | CRUD + 対応策管理 + 多言語化 |
+| IssuesPage | ✅ | CRUD + コメントスレッド + 多言語化 |
+| ApplicationsPage | ❌ | 削除済み（機能不要のため） |
+| DeliverablesPage | ✅ | CRUD + レビュー提出 |
+| MembersPage | ✅ | プロジェクトメンバー招待・ロール割当 |
+| SearchPage | ✅ | 横断検索（タスク/リスク/課題） |
+| HolidaysPage | ✅ | 営業日カレンダー・休日設定 |
+| UsersPage | ✅ | ユーザーCRUD管理 |
+| i18n (多言語化) | ✅ | react-i18next導入、全UI文字列キー管理、en/ja/zh対応、言語切替ボタン実装済み |
