@@ -65,7 +65,9 @@ export default function ApplicationsPage() {
       }
 
       setApplications(applications.map((a) => a.id === app.id ? { ...a, status: 'approved' } : a))
-    } catch { alert('Approve failed') }
+    } catch (err: any) {
+      alert(err.response?.data?.detail?.message || err.response?.data?.detail || 'Approve failed')
+    }
   }
 
   const handleRejectSubmit = async (e: React.FormEvent) => {
@@ -85,7 +87,9 @@ export default function ApplicationsPage() {
       setApplications(applications.map((a) => a.id === showRejectModal.id ? { ...a, status: 'rejected', rejection_reason: rejectionReason } : a))
       setShowRejectModal(null)
       setRejectionReason('')
-    } catch { alert('Reject failed') }
+    } catch (err: any) {
+      alert(err.response?.data?.detail?.message || err.response?.data?.detail || 'Reject failed')
+    }
   }
 
   const getStatusBadge = (status: string) => {
