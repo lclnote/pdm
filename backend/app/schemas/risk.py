@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, date
+from typing import Optional, Union
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
@@ -48,7 +48,14 @@ class RiskCountermeasureResponse(BaseModel):
     risk_id: UUID
     description: str
     assignee_id: UUID
-    due_date: Optional[str] = None
+    due_date: Optional[Union[str, date]] = None
     status: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RiskCountermeasureUpdate(BaseModel):
+    description: Optional[str] = None
+    assignee_id: Optional[str] = None
+    due_date: Optional[str] = None
+    status: Optional[str] = None

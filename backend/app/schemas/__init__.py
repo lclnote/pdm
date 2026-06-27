@@ -23,7 +23,7 @@ from app.schemas.deliverable import (
 )
 from app.schemas.risk import (
     RiskBase, RiskCreate, RiskUpdate, RiskResponse,
-    RiskCountermeasureCreate, RiskCountermeasureResponse,
+    RiskCountermeasureCreate, RiskCountermeasureResponse, RiskCountermeasureUpdate,
 )
 from app.schemas.issue import (
     IssueBase, IssueCreate, IssueUpdate, IssueResponse,
@@ -43,7 +43,7 @@ __all__ = [
     "ApplicationCreate", "ApplicationResponse", "ApplicationApprove", "ApplicationReject",
     "DeliverableBase", "DeliverableCreate", "DeliverableUpdate", "DeliverableResponse", "ReviewCreate",
     "RiskBase", "RiskCreate", "RiskUpdate", "RiskResponse",
-    "RiskCountermeasureCreate", "RiskCountermeasureResponse",
+    "RiskCountermeasureCreate", "RiskCountermeasureResponse", "RiskCountermeasureUpdate",
     "IssueBase", "IssueCreate", "IssueUpdate", "IssueResponse",
     "IssueCommentCreate", "IssueCommentResponse",
     "DashboardResponse",

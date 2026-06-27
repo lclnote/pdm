@@ -84,6 +84,9 @@ export default function TasksPage() {
       if (parentRef.current && !parentRef.current.contains(e.target as Node)) {
         setShowParentDropdown(false)
       }
+      if (collabRef.current && !collabRef.current.contains(e.target as Node)) {
+        setShowCollabDropdown(false)
+      }
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -105,7 +108,16 @@ export default function TasksPage() {
 
   const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]))
 
+  useEffect(() => {
+    if (!selectedTask) { setCollaborators([]); return }
+    api.get(`/tasks/${selectedTask.id}/collaborators`).then((res) => setCollaborators(res.data)).catch(() => {})
+  }, [selectedTask])
+
   const [showEdit, setShowEdit] = useState<Task | null>(null)
+  const [collaborators, setCollaborators] = useState<{ id: string; user_id: string }[]>([])
+  const [collaboratorName, setCollaboratorName] = useState('')
+  const [showCollabDropdown, setShowCollabDropdown] = useState(false)
+  const collabRef = useRef<HTMLDivElement>(null)
 
   const updateTask = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -242,6 +254,39 @@ export default function TasksPage() {
             <div><strong>{t('task.weightLabel')}</strong> {selectedTask.weight}</div>
             <div><strong>{t('task.actualHoursLabel')}</strong> {selectedTask.actual_hours ?? '-'}</div>
             <div><strong>{t('task.assigneeLabel')}</strong> {userMap[selectedTask.assignee_id] || selectedTask.assignee_id}</div>
+          </div>
+          <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '12px', fontSize: '14px' }}>
+            <strong>{t('task.collaboratorsLabel')}</strong>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+              {collaborators.map((c) => (
+                <span key={c.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', background: '#e8eaed', borderRadius: '12px', fontSize: '12px' }}>
+                  {userMap[c.user_id] || c.user_id}
+                  <span style={{ cursor: 'pointer', color: 'var(--danger, #e53e3e)', fontWeight: 'bold' }} onClick={() => {
+                    api.delete(`/tasks/${selectedTask.id}/collaborators/${c.id}`).then(() => setCollaborators(collaborators.filter((x) => x.id !== c.id))).catch(() => alert('Remove failed'))
+                  }}>×</span>
+                </span>
+              ))}
+              <div ref={collabRef} style={{ position: 'relative' }}>
+                <input value={collaboratorName} onChange={(e) => { setCollaboratorName(e.target.value); setShowCollabDropdown(true) }} onFocus={() => setShowCollabDropdown(true)} placeholder={t('task.addCollaborator')} style={{ width: '120px', fontSize: '12px', padding: '2px 8px', height: '24px' }} />
+                {showCollabDropdown && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 10, width: '200px', maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                    {users.filter((u) => u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).length === 0 ? (
+                      <div style={{ padding: '6px 10px', color: 'var(--text-secondary)', fontSize: '12px' }}>{t('task.noUsersFound')}</div>
+                    ) : users.filter((u) => u.name.toLowerCase().includes(collaboratorName.toLowerCase()) && !collaborators.some((c) => c.user_id === u.id) && u.id !== selectedTask?.assignee_id).map((u) => (
+                      <div key={u.id} onClick={() => {
+                        api.post(`/tasks/${selectedTask.id}/collaborators`, { user_id: u.id }).then((res) => {
+                          setCollaborators([...collaborators, res.data]); setCollaboratorName(''); setShowCollabDropdown(false)
+                        }).catch(() => alert('Add failed'))
+                      }} style={{ padding: '6px 10px', cursor: 'pointer', fontSize: '12px' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
+                        {u.name} <span style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>{u.email}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           {detailWarn && <div style={{ fontSize: '13px', color: '#e37400', marginTop: '8px' }}>⚠️ {t(detailWarn)}</div>}
         </div>

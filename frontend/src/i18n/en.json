@@ -106,6 +106,8 @@
     "weightLabel": "Weight:",
     "actualHoursLabel": "Actual Hours:",
     "assigneeLabel": "Assignee:",
+    "collaboratorsLabel": "Collaborators:",
+    "addCollaborator": "Add...",
     "updateFailed": "Update failed",
     "deleteFailed": "Delete failed",
     "statusChangeFailed": "Status change failed",
@@ -135,7 +137,16 @@
       "occurred": "Occurred",
       "mitigated": "Mitigated",
       "closed": "Closed"
-    }
+    },
+    "countermeasures": "Countermeasures",
+    "addCountermeasure": "+ Add",
+    "editCountermeasure": "Edit Countermeasure",
+    "noCountermeasures": "No countermeasures yet.",
+    "cmDeleteConfirm": "Delete this countermeasure?",
+    "cmDue": "Due",
+    "cmPlanned": "Planned",
+    "cmInProgress": "In Progress",
+    "cmCompleted": "Completed"
   },
   "issue": {
     "title": "Issues",

@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from app.core.database import get_db
 from app.models.risk import Risk, RiskCountermeasure
 from app.models.user import User
-from app.schemas.risk import RiskCreate, RiskUpdate, RiskResponse, RiskCountermeasureCreate, RiskCountermeasureResponse
+from app.schemas.risk import RiskCreate, RiskUpdate, RiskResponse, RiskCountermeasureCreate, RiskCountermeasureResponse, RiskCountermeasureUpdate
 from app.services.auth import get_current_user
 from app.services.state_machine import calculate_priority
 
@@ -81,4 +82,85 @@ async def delete_risk(
     if not risk:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk not found")
     await db.delete(risk)
+    await db.commit()
+
+
+@router.get("/risks/{risk_id}/countermeasures", response_model=list[RiskCountermeasureResponse])
+async def list_countermeasures(
+    risk_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(RiskCountermeasure).where(RiskCountermeasure.risk_id == risk_id).order_by(RiskCountermeasure.id)
+    )
+    return [RiskCountermeasureResponse.model_validate(c) for c in result.scalars()]
+
+
+@router.post("/risks/{risk_id}/countermeasures", response_model=RiskCountermeasureResponse, status_code=status.HTTP_201_CREATED)
+async def create_countermeasure(
+    risk_id: str,
+    data: RiskCountermeasureCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    risk_result = await db.execute(select(Risk).where(Risk.id == risk_id))
+    if not risk_result.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk not found")
+    cm = RiskCountermeasure(
+        risk_id=risk_id,
+        description=data.description,
+        assignee_id=data.assignee_id,
+        due_date=date.fromisoformat(data.due_date) if data.due_date and data.due_date.strip() else None,
+    )
+    db.add(cm)
+    await db.commit()
+    await db.refresh(cm)
+    return RiskCountermeasureResponse.model_validate(cm)
+
+
+@router.put("/risks/{risk_id}/countermeasures/{cm_id}", response_model=RiskCountermeasureResponse)
+async def update_countermeasure(
+    risk_id: str,
+    cm_id: str,
+    data: RiskCountermeasureUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(RiskCountermeasure).where(
+            RiskCountermeasure.id == cm_id,
+            RiskCountermeasure.risk_id == risk_id,
+        )
+    )
+    cm = result.scalar_one_or_none()
+    if not cm:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Countermeasure not found")
+    update_data = data.model_dump(exclude_unset=True)
+    if "due_date" in update_data:
+        update_data["due_date"] = date.fromisoformat(update_data["due_date"]) if update_data["due_date"] and update_data["due_date"].strip() else None
+    for field, value in update_data.items():
+        setattr(cm, field, value)
+    await db.commit()
+    await db.refresh(cm)
+    return RiskCountermeasureResponse.model_validate(cm)
+
+
+@router.delete("/risks/{risk_id}/countermeasures/{cm_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_countermeasure(
+    risk_id: str,
+    cm_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(RiskCountermeasure).where(
+            RiskCountermeasure.id == cm_id,
+            RiskCountermeasure.risk_id == risk_id,
+        )
+    )
+    cm = result.scalar_one_or_none()
+    if not cm:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Countermeasure not found")
+    await db.delete(cm)
     await db.commit()

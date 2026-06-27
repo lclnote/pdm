@@ -106,6 +106,8 @@
     "weightLabel": "重み:",
     "actualHoursLabel": "実績工数:",
     "assigneeLabel": "担当者:",
+    "collaboratorsLabel": "協力者:",
+    "addCollaborator": "追加...",
     "updateFailed": "更新に失敗しました",
     "deleteFailed": "削除に失敗しました",
     "statusChangeFailed": "状態変更に失敗しました",
@@ -135,7 +137,16 @@
       "occurred": "発生",
       "mitigated": "緩和済み",
       "closed": "クローズ"
-    }
+    },
+    "countermeasures": "対応策",
+    "addCountermeasure": "+ 追加",
+    "editCountermeasure": "対応策編集",
+    "noCountermeasures": "対応策はまだありません。",
+    "cmDeleteConfirm": "この対応策を削除しますか？",
+    "cmDue": "期限",
+    "cmPlanned": "計画",
+    "cmInProgress": "進行中",
+    "cmCompleted": "完了"
   },
   "issue": {
     "title": "課題",

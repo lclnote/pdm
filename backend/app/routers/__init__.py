@@ -7,6 +7,7 @@ from app.routers.deliverables import router as deliverables_router
 from app.routers.risks import router as risks_router
 from app.routers.issues import router as issues_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.task_collaborators import router as task_collaborators_router
 
 routers = [
     auth_router,
@@ -18,4 +19,5 @@ routers = [
     risks_router,
     issues_router,
     dashboard_router,
+    task_collaborators_router,
 ]
