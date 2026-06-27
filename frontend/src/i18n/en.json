@@ -102,6 +102,8 @@
     "addTask": "+ Add Task",
     "editTask": "Edit Task",
     "createTask": "Add Task",
+    "treeView": "Tree View",
+    "ganttView": "Gantt Chart",
     "noTasks": "No tasks yet",
     "deleteConfirm": "Delete this task and all subtasks?",
     "assigneeRequired": "Assignee *",

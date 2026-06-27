@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import { Task, User } from '../types'
 import Modal from '../components/Modal'
+import GanttChart from '../components/GanttChart'
 
 function dateRangeWarning(start?: string, end?: string, parentStart?: string, parentEnd?: string): string | null {
   if (!start && !end) return null
@@ -44,6 +45,7 @@ export default function TasksPage() {
   const [showParentDropdown, setShowParentDropdown] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [showUserDropdown, setShowUserDropdown] = useState(false)
+  const [viewMode, setViewMode] = useState<'tree' | 'gantt'>('tree')
   const [phaseStartDate, setPhaseStartDate] = useState('')
   const [phaseEndDate, setPhaseEndDate] = useState('')
   const userRef = useRef<HTMLDivElement>(null)
@@ -295,14 +297,28 @@ export default function TasksPage() {
     <div>
       <div className="page-header">
         <h1>{t('task.title')}</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('task.addTask')}</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className={`btn ${viewMode === 'tree' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setViewMode('tree')}>{t('task.treeView')}</button>
+          <button className={`btn ${viewMode === 'gantt' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setViewMode('gantt')}>{t('task.ganttView')}</button>
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('task.addTask')}</button>
+        </div>
       </div>
 
-      <div className="card" style={{ marginBottom: '24px' }}>
-        {tasks.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>{t('task.noTasks')}</div>
-        ) : renderTaskTree(tasks)}
-      </div>
+      {viewMode === 'tree' ? (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          {tasks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>{t('task.noTasks')}</div>
+          ) : renderTaskTree(tasks)}
+        </div>
+      ) : (
+        <div style={{ marginBottom: '24px' }}>
+          {tasks.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>{t('task.noTasks')}</div>
+          ) : (
+            <GanttChart tasks={tasks} />
+          )}
+        </div>
+      )}
 
       {selectedTask && (() => {
         const detailWarn = dateRangeWarning(selectedTask.start_date || undefined, selectedTask.end_date || undefined, phaseStartDate, phaseEndDate)

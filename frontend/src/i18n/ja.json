@@ -102,6 +102,8 @@
     "addTask": "+ タスク追加",
     "editTask": "タスク編集",
     "createTask": "タスク追加",
+    "treeView": "ツリー表示",
+    "ganttView": "ガントチャート",
     "noTasks": "タスクがありません",
     "deleteConfirm": "このタスクとすべての子タスクを削除しますか？",
     "assigneeRequired": "担当者 *",
