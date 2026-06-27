@@ -81,7 +81,8 @@ export default function ProjectsPage() {
   }
 
   const openEdit = (p: Project) => {
-    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date); setProgressCalcMethod(p.progress_calc_method || 'task_count'); setStatus(p.status || 'pending')
+    const normalizedStatus = p.status === 'planning' ? 'pending' : (p.status || 'pending')
+    setName(p.name); setDescription(p.description || ''); setStartDate(p.start_date); setEndDate(p.end_date); setProgressCalcMethod(p.progress_calc_method || 'task_count'); setStatus(normalizedStatus)
     setShowEdit(p)
   }
 
@@ -119,8 +120,9 @@ export default function ProjectsPage() {
   }
 
   const statusBadge = (status: string) => {
-    const cls = status === 'active' ? 'badge-active' : status === 'closed' ? 'badge-completed' : 'badge-pending'
-    return <span className={`badge ${cls}`}>{t(`project.status.${status}`, status)}</span>
+    const normalized = status === 'planning' ? 'pending' : status
+    const cls = normalized === 'active' ? 'badge-active' : normalized === 'closed' ? 'badge-completed' : 'badge-pending'
+    return <span className={`badge ${cls}`}>{t(`project.status.${normalized}`, normalized)}</span>
   }
 
   const totalWarnings = Object.values(warnings).reduce((s, w) => s + w.phaseCount + w.taskCount, 0)
