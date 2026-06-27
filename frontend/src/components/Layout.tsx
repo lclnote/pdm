@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { useParams } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function Layout() {
   const navigate = useNavigate()
   const { projectId } = useParams()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { t, i18n } = useTranslation()
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -16,25 +17,30 @@ export default function Layout() {
 
   const closeSidebar = () => setSidebarOpen(false)
 
+  const toggleLang = () => i18n.changeLanguage(i18n.language === 'ja' ? 'en' : 'ja')
+
   return (
     <div className="layout">
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={closeSidebar} />
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <h2>PDM</h2>
+        <h2>{t('app.title')}</h2>
         <nav onClick={closeSidebar}>
-          <NavLink to="/projects" end>Projects</NavLink>
+          <NavLink to="/projects" end>{t('nav.projects')}</NavLink>
           {projectId && (
             <>
-              <NavLink to={`/projects/${projectId}`}>Dashboard</NavLink>
-              <NavLink to={`/projects/${projectId}/phases`}>Phases</NavLink>
-              <NavLink to={`/projects/${projectId}/risks`}>Risks</NavLink>
-              <NavLink to={`/projects/${projectId}/issues`}>Issues</NavLink>
+              <NavLink to={`/projects/${projectId}`}>{t('nav.dashboard')}</NavLink>
+              <NavLink to={`/projects/${projectId}/phases`}>{t('nav.phases')}</NavLink>
+              <NavLink to={`/projects/${projectId}/risks`}>{t('nav.risks')}</NavLink>
+              <NavLink to={`/projects/${projectId}/issues`}>{t('nav.issues')}</NavLink>
             </>
           )}
         </nav>
         <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
           <div style={{ fontSize: '14px', marginBottom: '8px' }}>{user.name}</div>
-          <button className="btn btn-sm" onClick={handleLogout}>Logout</button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-sm" onClick={toggleLang}>{i18n.language === 'ja' ? 'EN' : 'JP'}</button>
+            <button className="btn btn-sm" onClick={handleLogout}>{t('nav.logout')}</button>
+          </div>
         </div>
       </aside>
       <main className="main">

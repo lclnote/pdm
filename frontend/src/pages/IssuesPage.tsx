@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import Modal from '../components/Modal'
 
@@ -13,6 +14,7 @@ interface Issue {
 }
 
 export default function IssuesPage() {
+  const { t } = useTranslation()
   const { projectId } = useParams()
   const [issues, setIssues] = useState<Issue[]>([])
   const [showCreate, setShowCreate] = useState(false)
@@ -37,18 +39,18 @@ export default function IssuesPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Issues</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Add Issue</button>
+        <h1>{t('issue.title')}</h1>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('issue.addIssue')}</button>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Assignee</th>
+            <th>{t('common.name')}</th>
+            <th>{t('common.type')}</th>
+            <th>{t('common.priority')}</th>
+            <th>{t('common.status')}</th>
+            <th>{t('common.assignee')}</th>
           </tr>
         </thead>
         <tbody>
@@ -65,34 +67,34 @@ export default function IssuesPage() {
       </table>
 
       {showCreate && (
-        <Modal title="Add Issue" onClose={() => setShowCreate(false)}>
+        <Modal title={t('issue.createIssue')} onClose={() => setShowCreate(false)}>
           <form onSubmit={createIssue}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Type</label>
+              <label>{t('common.type')}</label>
               <select value={type} onChange={(e) => setType(e.target.value)}>
-                <option value="bug">Bug</option>
-                <option value="specification_change">Spec Change</option>
-                <option value="request">Request</option>
-                <option value="obstacle">Obstacle</option>
-                <option value="other">Other</option>
+                <option value="bug">{t('issue.bug')}</option>
+                <option value="specification_change">{t('issue.specChange')}</option>
+                <option value="request">{t('issue.request')}</option>
+                <option value="obstacle">{t('issue.obstacle')}</option>
+                <option value="other">{t('issue.other')}</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Priority</label>
+              <label>{t('common.priority')}</label>
               <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="urgent">{t('issue.urgent')}</option>
+                <option value="high">{t('issue.high')}</option>
+                <option value="medium">{t('issue.medium')}</option>
+                <option value="low">{t('issue.low')}</option>
               </select>
             </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowCreate(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Create</button>
+              <button type="button" className="btn" onClick={() => setShowCreate(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>

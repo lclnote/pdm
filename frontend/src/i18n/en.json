@@ -1,0 +1,144 @@
+{
+  "app": {
+    "title": "PDM",
+    "subtitle": "Project Development Manager"
+  },
+  "nav": {
+    "projects": "Projects",
+    "dashboard": "Dashboard",
+    "phases": "Phases",
+    "risks": "Risks",
+    "issues": "Issues",
+    "logout": "Logout"
+  },
+  "common": {
+    "loading": "Loading...",
+    "name": "Name",
+    "description": "Description",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "priority": "Priority",
+    "type": "Type",
+    "impact": "Impact",
+    "probability": "Probability",
+    "assignee": "Assignee",
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "task": "Task",
+    "period": "Period",
+    "order": "Order",
+    "weight": "Weight",
+    "level": "Level",
+    "parallel": "Parallel"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "loginFailed": "Login failed. Please check your credentials."
+  },
+  "project": {
+    "title": "Projects",
+    "newProject": "+ New Project",
+    "editProject": "Edit Project",
+    "addPhase": "+ Add Phase",
+    "projectPeriod": "Project period: {{start}} ~ {{end}}",
+    "taskCount": "Tasks",
+    "daysLeft": "Days Left",
+    "pendingApps": "Pending Apps",
+    "delayed": "Delayed",
+    "progress": "Progress",
+    "deleteConfirm": "Delete this project?",
+    "dateRangeWarnings": "⚠️ {{count}} date range warning(s) across projects",
+    "phaseWarnings": "{{count}} phase(s) with date warnings",
+    "taskWarnings": "{{count}} task(s) with date warnings",
+    "warnings": "{{count}} warning(s)"
+  },
+  "dashboard": {
+    "dateRangeWarnings": "⚠️ Date Range Warnings ({{count}})",
+    "taskWarningsAcrossPhases": "{{count}} task(s) with date range warnings across phases"
+  },
+  "phase": {
+    "title": "Phases",
+    "addPhase": "+ Add Phase",
+    "editPhase": "Edit Phase",
+    "createPhase": "Add Phase",
+    "deleteConfirm": "Delete this phase?",
+    "taskWarnings": "{{count}} task(s) with date range warnings",
+    "gateRequest": "Gate Request"
+  },
+  "task": {
+    "title": "Tasks",
+    "addTask": "+ Add Task",
+    "editTask": "Edit Task",
+    "createTask": "Add Task",
+    "noTasks": "No tasks yet",
+    "deleteConfirm": "Delete this task and all subtasks?",
+    "assigneeRequired": "Assignee *",
+    "parentTask": "Parent Task (optional)",
+    "searchUser": "Search user name...",
+    "searchTask": "Search task name...",
+    "noUsersFound": "No users found",
+    "noTasksFound": "No tasks found",
+    "statusLabel": "Status:",
+    "levelLabel": "Level:",
+    "periodLabel": "Period:",
+    "weightLabel": "Weight:",
+    "assigneeLabel": "Assignee:",
+    "updateFailed": "Update failed",
+    "deleteFailed": "Delete failed",
+    "statusChangeFailed": "Status change failed",
+    "status": {
+      "not_started": "Not Started",
+      "ready": "Ready",
+      "in_progress": "In Progress",
+      "awaiting_approval": "Awaiting Approval",
+      "completed": "Completed",
+      "on_hold": "On Hold",
+      "suspended": "Suspended"
+    }
+  },
+  "risk": {
+    "title": "Risks",
+    "addRisk": "+ Add Risk",
+    "createRisk": "Add Risk",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "issue": {
+    "title": "Issues",
+    "addIssue": "+ Add Issue",
+    "createIssue": "Add Issue",
+    "bug": "Bug",
+    "specChange": "Spec Change",
+    "request": "Request",
+    "obstacle": "Obstacle",
+    "other": "Other",
+    "urgent": "Urgent",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "warning": {
+    "phaseStartBeforeProject": "Start date is before project start",
+    "phaseEndAfterProject": "End date is after project end",
+    "phaseEndBeforeProjectStart": "End date is before project start",
+    "phaseStartAfterProjectEnd": "Start date is after project end",
+    "phaseEndBeforeStart": "End date is before start date",
+    "taskStartBeforePhaseStart": "Task starts before phase start",
+    "taskEndAfterPhaseEnd": "Task ends after phase end",
+    "taskEndBeforePhaseStart": "Task ends before phase start",
+    "taskStartAfterPhaseEnd": "Task starts after phase end",
+    "taskEndBeforeStart": "Task end before start",
+    "taskWarnings": "{{count}} task(s) with date range warnings",
+    "summary": "⚠️ {{count}} warning(s)"
+  },
+  "dateRange": {
+    "format": "{{start}} ~ {{end}}"
+  }
+}

@@ -1,30 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import { Phase } from '../types'
 import Modal from '../components/Modal'
 
-function dateRangeWarning(start?: string, end?: string, projStart?: string, projEnd?: string): string | null {
-  if (!start && !end) return null
-  if (projStart && start && start < projStart) return 'Start date is before project start'
-  if (projEnd && end && end > projEnd) return 'End date is after project end'
-  if (projStart && end && end < projStart) return 'End date is before project start'
-  if (projEnd && start && start > projEnd) return 'Start date is after project end'
-  if (start && end && end < start) return 'End date is before start date'
-  return null
-}
-
-function taskDateWarning(start?: string, end?: string, pStart?: string, pEnd?: string): string | null {
-  if (!start && !end) return null
-  if (pStart && start && start < pStart) return 'Task starts before phase start'
-  if (pEnd && end && end > pEnd) return 'Task ends after phase end'
-  if (pStart && end && end < pStart) return 'Task ends before phase start'
-  if (pEnd && start && start > pEnd) return 'Task starts after phase end'
-  if (start && end && end < start) return 'Task end before start'
-  return null
-}
-
 export default function PhasesPage() {
+  const { t } = useTranslation()
   const { projectId } = useParams()
   const navigate = useNavigate()
   const [phases, setPhases] = useState<Phase[]>([])
@@ -37,6 +19,26 @@ export default function PhasesPage() {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+
+  function dateRangeWarning(start?: string, end?: string, projStart?: string, projEnd?: string): string | null {
+    if (!start && !end) return null
+    if (projStart && start && start < projStart) return t('warning.phaseStartBeforeProject')
+    if (projEnd && end && end > projEnd) return t('warning.phaseEndAfterProject')
+    if (projStart && end && end < projStart) return t('warning.phaseEndBeforeProjectStart')
+    if (projEnd && start && start > projEnd) return t('warning.phaseStartAfterProjectEnd')
+    if (start && end && end < start) return t('warning.phaseEndBeforeStart')
+    return null
+  }
+
+  function taskDateWarning(start?: string, end?: string, pStart?: string, pEnd?: string): string | null {
+    if (!start && !end) return null
+    if (pStart && start && start < pStart) return t('warning.taskStartBeforePhaseStart')
+    if (pEnd && end && end > pEnd) return t('warning.taskEndAfterPhaseEnd')
+    if (pStart && end && end < pStart) return t('warning.taskEndBeforePhaseStart')
+    if (pEnd && start && start > pEnd) return t('warning.taskStartAfterPhaseEnd')
+    if (start && end && end < start) return t('warning.taskEndBeforeStart')
+    return null
+  }
 
   useEffect(() => { if (projectId) loadPage() }, [projectId])
 
@@ -99,7 +101,7 @@ export default function PhasesPage() {
   }
 
   const deletePhase = async (id: string) => {
-    if (!confirm('Delete this phase?')) return
+    if (!confirm(t('phase.deleteConfirm'))) return
     try {
       await api.delete(`/phases/${id}`)
       setPhases(phases.filter((p) => p.id !== id))
@@ -112,21 +114,18 @@ export default function PhasesPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Phases</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Add Phase</button>
+        <h1>{t('phase.title')}</h1>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('phase.addPhase')}</button>
       </div>
 
       {projStartDate && projEndDate && (
         <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-          Project period: {projStartDate} ~ {projEndDate}
+          {t('project.projectPeriod', { start: projStartDate, end: projEndDate })}
           {(phases.filter((ph) => dateRangeWarning(ph.start_date || undefined, ph.end_date || undefined, projStartDate, projEndDate)).length > 0 || totalTaskWarns > 0) && (
             <span style={{ marginLeft: '12px', color: '#e37400' }}>
-              ⚠️ {phases.filter((ph) => dateRangeWarning(ph.start_date || undefined, ph.end_date || undefined, projStartDate, projEndDate)).length + totalTaskWarns} warning(s)
+              {t('warning.summary', { count: phases.filter((ph) => dateRangeWarning(ph.start_date || undefined, ph.end_date || undefined, projStartDate, projEndDate)).length + totalTaskWarns })}
             </span>
           )}
-          <span style={{ marginLeft: '8px', color: '#888', fontSize: '11px' }}>
-            taskWarns: {JSON.stringify(taskWarns)} | phases: {phases.length} | debug: {Object.keys(taskWarns).length}
-          </span>
         </div>
       )}
 
@@ -140,7 +139,7 @@ export default function PhasesPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong>
                     {ph.name}
-                    {(warn || tCount > 0) && <span title={warn || `${tCount} task(s) with date warnings`} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}
+                    {(warn || tCount > 0) && <span title={warn || t('warning.taskWarnings', {count: tCount})} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}
                   </strong>
                   <span className={`badge ${ph.status === 'active' ? 'badge-active' : ph.status === 'completed' ? 'badge-completed' : 'badge-pending'}`}>
                     {ph.status}
@@ -148,18 +147,18 @@ export default function PhasesPage() {
                 </div>
                 {ph.description && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>{ph.description}</p>}
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                  {ph.start_date && ph.end_date ? `${ph.start_date} ~ ${ph.end_date}` : ph.start_date || ph.end_date ? `${ph.start_date || '...'} ~ ${ph.end_date || '...'}` : ''}
+                  {ph.start_date || ph.end_date ? t('dateRange.format', { start: ph.start_date || '...', end: ph.end_date || '...' }) : ''}
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  Order: {ph.sort_order}
-                  {ph.parallel_execution && ' (Parallel)'}
+                  {t('common.order')}: {ph.sort_order}
+                  {ph.parallel_execution && t('common.parallel')}
                 </div>
                 {warn && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {warn}</div>}
-                {tCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {tCount} task(s) with date range warnings</div>}
+                {tCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t('warning.taskWarnings', {count: tCount})}</div>}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
-                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); setShowEdit(ph); setName(ph.name); setDescription(ph.description || ''); setStartDate(ph.start_date || ''); setEndDate(ph.end_date || '') }}>Edit</button>
-                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deletePhase(ph.id) }}>Delete</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); setShowEdit(ph); setName(ph.name); setDescription(ph.description || ''); setStartDate(ph.start_date || ''); setEndDate(ph.end_date || '') }}>{t('common.edit')}</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deletePhase(ph.id) }}>{t('common.delete')}</button>
               </div>
             </div>
           )
@@ -167,52 +166,52 @@ export default function PhasesPage() {
       </div>
 
       {showCreate && (
-        <Modal title="Add Phase" onClose={() => { setShowCreate(false); setStartDate(''); setEndDate('') }}>
+        <Modal title={t('phase.createPhase')} onClose={() => { setShowCreate(false); setStartDate(''); setEndDate('') }}>
           <form onSubmit={createPhase}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowCreate(false); setStartDate(''); setEndDate('') }}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Create</button>
+              <button type="button" className="btn" onClick={() => { setShowCreate(false); setStartDate(''); setEndDate('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>
       )}
 
       {showEdit && (
-        <Modal title="Edit Phase" onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
+        <Modal title={t('phase.editPhase')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
           <form onSubmit={updatePhase}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>{t('common.description')}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Save</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
         </Modal>

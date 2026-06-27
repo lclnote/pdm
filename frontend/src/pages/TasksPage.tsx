@@ -1,29 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import { Task, User } from '../types'
 import Modal from '../components/Modal'
 
 function dateRangeWarning(start?: string, end?: string, parentStart?: string, parentEnd?: string): string | null {
   if (!start && !end) return null
-  if (parentStart && start && start < parentStart) return 'Start date is before phase start'
-  if (parentEnd && end && end > parentEnd) return 'End date is after phase end'
-  if (parentStart && end && end < parentStart) return 'End date is before phase start'
-  if (parentEnd && start && start > parentEnd) return 'Start date is after phase end'
-  if (start && end && end < start) return 'End date is before start date'
+  if (parentStart && start && start < parentStart) return 'warning.phaseStartBeforeProject'
+  if (parentEnd && end && end > parentEnd) return 'warning.phaseEndAfterProject'
+  if (parentStart && end && end < parentStart) return 'warning.phaseEndBeforeProjectStart'
+  if (parentEnd && start && start > parentEnd) return 'warning.phaseStartAfterProjectEnd'
+  if (start && end && end < start) return 'warning.phaseEndBeforeStart'
   return null
 }
 
 const STATUS_OPTIONS = ['not_started', 'ready', 'in_progress', 'awaiting_approval', 'completed', 'on_hold', 'suspended']
-const STATUS_LABELS: Record<string, string> = {
-  not_started: 'Not Started',
-  ready: 'Ready',
-  in_progress: 'In Progress',
-  awaiting_approval: 'Awaiting Approval',
-  completed: 'Completed',
-  on_hold: 'On Hold',
-  suspended: 'Suspended',
-}
 const STATUS_BADGE: Record<string, string> = {
   not_started: 'badge-pending',
   ready: 'badge-active',
@@ -35,6 +27,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 export default function TasksPage() {
+  const { t } = useTranslation()
   const { projectId, phaseId } = useParams()
   const [tasks, setTasks] = useState<Task[]>([])
   const [showCreate, setShowCreate] = useState(false)
@@ -53,6 +46,8 @@ export default function TasksPage() {
   const [phaseEndDate, setPhaseEndDate] = useState('')
   const userRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
+
+  const statusLabel = (s: string) => t(`task.status.${s}`)
 
   const sortByStartDate = (items: Task[]): Task[] =>
     [...items].sort((a, b) => {
@@ -125,21 +120,21 @@ export default function TasksPage() {
       setTasks(sortByStartDate(refresh(tasks)))
       setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
     } catch (e: any) {
-      alert(e.response?.data?.detail?.detail || 'Update failed')
+      alert(e.response?.data?.detail?.detail || t('task.updateFailed'))
     }
   }
 
   const formWarning = dateRangeWarning(startDate, endDate, phaseStartDate, phaseEndDate)
 
   const deleteTask = async (taskId: string) => {
-    if (!confirm('Delete this task and all subtasks?')) return
+    if (!confirm(t('task.deleteConfirm'))) return
     try {
       await api.delete(`/tasks/${taskId}`)
       const remove = (items: Task[]): Task[] => items.filter((t) => t.id !== taskId).map((t) => ({ ...t, children: t.children ? remove(t.children) : undefined }))
       setTasks(sortByStartDate(remove(tasks)))
       setSelectedTask(null)
     } catch (e: any) {
-      alert(e.response?.data?.detail?.detail || 'Delete failed')
+      alert(e.response?.data?.detail?.detail || t('task.deleteFailed'))
     }
   }
 
@@ -166,7 +161,7 @@ export default function TasksPage() {
         return update(prev)
       })
     } catch (e: any) {
-      alert(e.response?.data?.detail?.message || 'Status change failed')
+      alert(e.response?.data?.detail?.message || t('task.statusChangeFailed'))
     }
   }
 
@@ -187,9 +182,9 @@ export default function TasksPage() {
           >
             <span style={{ flex: 1, fontSize: '14px' }}>
               {t.name}
-              {warn && <span title={warn} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
+              {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <span className={`badge ${STATUS_BADGE[t.status]}`}>{STATUS_LABELS[t.status]}</span>
+            <span className={`badge ${STATUS_BADGE[t.status]}`}>{statusLabel(t.status)}</span>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.start_date ? t.start_date.slice(5) : ''}~{t.end_date ? t.end_date.slice(5) : ''}</span>
             <select
               value={t.status}
@@ -198,11 +193,11 @@ export default function TasksPage() {
               style={{ width: 'auto', fontSize: '12px', padding: '2px 4px' }}
             >
               {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                <option key={s} value={s}>{statusLabel(s)}</option>
               ))}
             </select>
           </div>
-          {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {warn}</div>}
+          {warn && <div style={{ fontSize: '12px', color: '#e37400', marginLeft: depth * 24 + 8, marginBottom: '4px' }}>⚠️ {t(warn)}</div>}
           {t.children && renderTaskTree(t.children, depth + 1)}
         </div>
       )})}
@@ -212,13 +207,13 @@ export default function TasksPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Tasks</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Add Task</button>
+        <h1>{t('task.title')}</h1>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('task.addTask')}</button>
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
         {tasks.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>No tasks yet</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>{t('task.noTasks')}</div>
         ) : renderTaskTree(tasks)}
       </div>
 
@@ -227,37 +222,37 @@ export default function TasksPage() {
         return (
         <div className="card" style={detailWarn ? { borderLeft: '4px solid var(--warning)' } : undefined}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={detailWarn} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
+            <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>Edit</button>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>Delete</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
-            <div><strong>Status:</strong> {STATUS_LABELS[selectedTask.status]}</div>
-            <div><strong>Level:</strong> {selectedTask.task_level}</div>
-            <div><strong>Period:</strong> {selectedTask.start_date || '...'} ~ {selectedTask.end_date || '...'}</div>
-            <div><strong>Weight:</strong> {selectedTask.weight}</div>
-            <div><strong>Assignee:</strong> {userMap[selectedTask.assignee_id] || selectedTask.assignee_id}</div>
+            <div><strong>{t('task.statusLabel')}</strong> {statusLabel(selectedTask.status)}</div>
+            <div><strong>{t('task.levelLabel')}</strong> {selectedTask.task_level}</div>
+            <div><strong>{t('task.periodLabel')}</strong> {selectedTask.start_date || '...'} ~ {selectedTask.end_date || '...'}</div>
+            <div><strong>{t('task.weightLabel')}</strong> {selectedTask.weight}</div>
+            <div><strong>{t('task.assigneeLabel')}</strong> {userMap[selectedTask.assignee_id] || selectedTask.assignee_id}</div>
           </div>
-          {detailWarn && <div style={{ fontSize: '13px', color: '#e37400', marginTop: '8px' }}>⚠️ {detailWarn}</div>}
+          {detailWarn && <div style={{ fontSize: '13px', color: '#e37400', marginTop: '8px' }}>⚠️ {t(detailWarn)}</div>}
         </div>
       )})()}
 
       {showEdit && (
-        <Modal title="Edit Task" onClose={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.editTask')} onClose={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={updateTask}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group" style={{ position: 'relative' }} ref={userRef}>
-              <label>Assignee *</label>
-              <input value={assigneeName} onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }} onFocus={() => setShowUserDropdown(true)} placeholder="Search user name..." required />
+              <label>{t('task.assigneeRequired')}</label>
+              <input value={assigneeName} onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }} onFocus={() => setShowUserDropdown(true)} placeholder={t('task.searchUser')} required />
               {showUserDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredUsers.length === 0 ? (
-                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No users found</div>
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noUsersFound')}</div>
                   ) : filteredUsers.map((u) => (
                     <div key={u.id} onClick={() => { setAssigneeId(u.id); setAssigneeName(u.name); setShowUserDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: assigneeId === u.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
@@ -269,20 +264,20 @@ export default function TasksPage() {
               )}
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
-              <label>Parent Task (optional)</label>
-              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder="Search task name..." />
+              <label>{t('task.parentTask')}</label>
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
               {showParentDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredTasks.length === 0 ? (
-                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No tasks found</div>
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noTasksFound')}</div>
                   ) : filteredTasks.map((t) => (
                     <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
@@ -293,29 +288,29 @@ export default function TasksPage() {
                 </div>
               )}
             </div>
-            {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
+            {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Save</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
         </Modal>
       )}
 
       {showCreate && (
-        <Modal title="Add Task" onClose={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.createTask')} onClose={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={createTask}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group" ref={userRef} style={{ position: 'relative' }}>
-              <label>Assignee *</label>
+              <label>{t('task.assigneeRequired')}</label>
               <input
                 value={assigneeName}
                 onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }}
                 onFocus={() => setShowUserDropdown(true)}
-                placeholder="Search user name..."
+                placeholder={t('task.searchUser')}
                 required
               />
               {showUserDropdown && (
@@ -325,7 +320,7 @@ export default function TasksPage() {
                   background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 }}>
                   {filteredUsers.length === 0 ? (
-                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No users found</div>
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noUsersFound')}</div>
                   ) : filteredUsers.map((u) => (
                     <div
                       key={u.id}
@@ -344,20 +339,20 @@ export default function TasksPage() {
               )}
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
             </div>
             <div className="form-group" style={{ position: 'relative' }} ref={parentRef}>
-              <label>Parent Task (optional)</label>
-              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder="Search task name..." />
+              <label>{t('task.parentTask')}</label>
+              <input value={parentTaskName} onChange={(e) => { setParentTaskName(e.target.value); setParentTaskId(''); setShowParentDropdown(true) }} onFocus={() => setShowParentDropdown(true)} placeholder={t('task.searchTask')} />
               {showParentDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredTasks.length === 0 ? (
-                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>No tasks found</div>
+                    <div style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: '14px' }}>{t('task.noTasksFound')}</div>
                   ) : filteredTasks.map((t) => (
                     <div key={t.id} onClick={() => { setParentTaskId(t.id); setParentTaskName(t.name); setShowParentDropdown(false) }} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '14px', background: parentTaskId === t.id ? '#e8f0fe' : undefined }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
@@ -368,10 +363,10 @@ export default function TasksPage() {
                 </div>
               )}
             </div>
-            {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {formWarning}</div>}
+            {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Create</button>
+              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>

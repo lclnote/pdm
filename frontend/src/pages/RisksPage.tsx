@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import Modal from '../components/Modal'
 
@@ -14,6 +15,7 @@ interface Risk {
 }
 
 export default function RisksPage() {
+  const { t } = useTranslation()
   const { projectId } = useParams()
   const [risks, setRisks] = useState<Risk[]>([])
   const [showCreate, setShowCreate] = useState(false)
@@ -47,18 +49,18 @@ export default function RisksPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Risks</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ Add Risk</button>
+        <h1>{t('risk.title')}</h1>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('risk.addRisk')}</button>
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Impact</th>
-            <th>Probability</th>
-            <th>Priority</th>
-            <th>Status</th>
+            <th>{t('common.name')}</th>
+            <th>{t('common.impact')}</th>
+            <th>{t('common.probability')}</th>
+            <th>{t('common.priority')}</th>
+            <th>{t('common.status')}</th>
           </tr>
         </thead>
         <tbody>
@@ -75,31 +77,31 @@ export default function RisksPage() {
       </table>
 
       {showCreate && (
-        <Modal title="Add Risk" onClose={() => setShowCreate(false)}>
+        <Modal title={t('risk.createRisk')} onClose={() => setShowCreate(false)}>
           <form onSubmit={createRisk}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Impact</label>
+              <label>{t('common.impact')}</label>
               <select value={impact} onChange={(e) => setImpact(e.target.value)}>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="high">{t('risk.high')}</option>
+                <option value="medium">{t('risk.medium')}</option>
+                <option value="low">{t('risk.low')}</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Probability</label>
+              <label>{t('common.probability')}</label>
               <select value={probability} onChange={(e) => setProbability(e.target.value)}>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="high">{t('risk.high')}</option>
+                <option value="medium">{t('risk.medium')}</option>
+                <option value="low">{t('risk.low')}</option>
               </select>
             </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowCreate(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Create</button>
+              <button type="button" className="btn" onClick={() => setShowCreate(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>

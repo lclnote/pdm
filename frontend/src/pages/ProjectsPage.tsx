@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../api/client'
 import { Project } from '../types'
 import Modal from '../components/Modal'
 
 function taskDateWarning(start?: string, end?: string, pStart?: string, pEnd?: string): string | null {
   if (!start && !end) return null
-  if (pStart && start && start < pStart) return 'Task starts before phase start'
-  if (pEnd && end && end > pEnd) return 'Task ends after phase end'
-  if (pStart && end && end < pStart) return 'Task ends before phase start'
-  if (pEnd && start && start > pEnd) return 'Task starts after phase end'
-  if (start && end && end < start) return 'Task end before start'
+  if (pStart && start && start < pStart) return 'warning.taskStartBeforePhaseStart'
+  if (pEnd && end && end > pEnd) return 'warning.taskEndAfterPhaseEnd'
+  if (pStart && end && end < pStart) return 'warning.taskEndBeforePhaseStart'
+  if (pEnd && start && start > pEnd) return 'warning.taskStartAfterPhaseEnd'
+  if (start && end && end < start) return 'warning.taskEndBeforeStart'
   return null
 }
 
 export default function ProjectsPage() {
+  const { t } = useTranslation()
   const [projects, setProjects] = useState<Project[]>([])
   const [warnings, setWarnings] = useState<Record<string, { phaseCount: number; taskCount: number }>>({})
   const [showCreate, setShowCreate] = useState(false)
@@ -95,7 +97,7 @@ export default function ProjectsPage() {
   }
 
   const deleteProject = async (id: string) => {
-    if (!confirm('Delete this project?')) return
+    if (!confirm(t('project.deleteConfirm'))) return
     try {
       await api.delete(`/projects/${id}`)
       loadProjects()
@@ -103,7 +105,7 @@ export default function ProjectsPage() {
   }
 
   const selfWarn = (p: Project): string | null => {
-    if (p.start_date && p.end_date && p.end_date < p.start_date) return 'End date before start date'
+    if (p.start_date && p.end_date && p.end_date < p.start_date) return 'warning.endDateBeforeStartDate'
     return null
   }
 
@@ -117,13 +119,13 @@ export default function ProjectsPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Projects</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ New Project</button>
+        <h1>{t('project.title')}</h1>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('project.newProject')}</button>
       </div>
 
       {totalWarnings > 0 && (
         <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '16px' }}>
-          ⚠️ {totalWarnings} date range warning(s) across projects
+          {t('project.dateRangeWarnings', {count: totalWarnings})}
         </div>
       )}
 
@@ -137,21 +139,21 @@ export default function ProjectsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <h3 style={{ fontSize: '16px' }}>
                     {p.name}
-                    {(self || w) && <span title={self || `${w.phaseCount + w.taskCount} warning(s)`} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
+                    {(self || w) && <span title={self ? t(self) : `${w.phaseCount + w.taskCount} warning(s)`} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
                   </h3>
                   {statusBadge(p.status)}
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>{p.description}</p>
                 <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  {p.start_date} ~ {p.end_date}
+                  {t('dateRange.format', {start: p.start_date, end: p.end_date})}
                 </div>
-                {self && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {self}</div>}
-                {w?.phaseCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {w.phaseCount} phase(s) with date warnings</div>}
-                {w?.taskCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {w.taskCount} task(s) with date warnings</div>}
+                {self && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t(self)}</div>}
+                {w?.phaseCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>{t('project.phaseWarnings', {count: w.phaseCount})}</div>}
+                {w?.taskCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>{t('project.taskWarnings', {count: w.taskCount})}</div>}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
-                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); openEdit(p) }}>Edit</button>
-                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deleteProject(p.id) }}>Delete</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); openEdit(p) }}>{t('common.edit')}</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deleteProject(p.id) }}>{t('common.delete')}</button>
               </div>
             </div>
           )
@@ -159,54 +161,54 @@ export default function ProjectsPage() {
       </div>
 
       {showCreate && (
-        <Modal title="New Project" onClose={() => setShowCreate(false)}>
+        <Modal title={t('project.newProject')} onClose={() => setShowCreate(false)}>
           <form onSubmit={createProject}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>{t('common.description')}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
             </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => setShowCreate(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Create</button>
+              <button type="button" className="btn" onClick={() => setShowCreate(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>
         </Modal>
       )}
 
       {showEdit && (
-        <Modal title="Edit Project" onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
+        <Modal title={t('project.editProject')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>
           <form onSubmit={updateProject}>
             <div className="form-group">
-              <label>Name</label>
+              <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>Description</label>
+              <label>{t('common.description')}</label>
               <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="form-group">
-              <label>Start Date</label>
+              <label>{t('common.startDate')}</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
             </div>
             <div className="form-group">
-              <label>End Date</label>
+              <label>{t('common.endDate')}</label>
               <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
             </div>
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>Cancel</button>
-              <button type="submit" className="btn btn-primary">Save</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setStartDate(''); setEndDate('') }}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
         </Modal>
