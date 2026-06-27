@@ -10,6 +10,7 @@
     "risks": "リスク",
     "issues": "課題",
     "applications": "申請管理",
+    "members": "メンバー",
     "logout": "ログアウト"
   },
   "common": {
@@ -198,6 +199,19 @@
       "pending": "保留中",
       "approved": "承認済み",
       "rejected": "却下済み"
+    }
+  },
+  "projectMember": {
+    "title": "プロジェクトメンバー",
+    "addMember": "+ メンバー追加",
+    "addMemberTitle": "プロジェクトメンバー追加",
+    "noMembers": "このプロジェクトにはメンバーがいません。",
+    "role": "役割",
+    "removeConfirm": "このメンバーをプロジェクトから削除してもよろしいですか？",
+    "roles": {
+      "manager": "管理者",
+      "member": "メンバー",
+      "viewer": "閲覧者"
     }
   },
   "warning": {

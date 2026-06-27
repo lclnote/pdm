@@ -10,6 +10,7 @@
     "risks": "Risks",
     "issues": "Issues",
     "applications": "Applications",
+    "members": "Members",
     "logout": "Logout"
   },
   "common": {
@@ -198,6 +199,19 @@
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected"
+    }
+  },
+  "projectMember": {
+    "title": "Project Members",
+    "addMember": "+ Add Member",
+    "addMemberTitle": "Add Project Member",
+    "noMembers": "No members in this project.",
+    "role": "Role",
+    "removeConfirm": "Are you sure you want to remove this member from the project?",
+    "roles": {
+      "manager": "Manager",
+      "member": "Member",
+      "viewer": "Viewer"
     }
   },
   "warning": {
