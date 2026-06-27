@@ -114,6 +114,9 @@ export default function TasksPage() {
   }, [selectedTask])
 
   const [showEdit, setShowEdit] = useState<Task | null>(null)
+  const [showApplyModal, setShowApplyModal] = useState<Task | null>(null)
+  const [applyReason, setApplyReason] = useState('')
+  const [applyEvidence, setApplyEvidence] = useState('')
   const [collaborators, setCollaborators] = useState<{ id: string; user_id: string }[]>([])
   const [collaboratorName, setCollaboratorName] = useState('')
   const [showCollabDropdown, setShowCollabDropdown] = useState(false)
@@ -183,6 +186,35 @@ export default function TasksPage() {
     }
   }
 
+  const submitApplyRequest = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!showApplyModal) return
+    try {
+      await api.post('/tasks/apply', {
+        task_id: showApplyModal.id,
+        application_type: 'task_submission',
+        reason: applyReason,
+        evidence: applyEvidence || undefined,
+      })
+      await api.put(`/tasks/${showApplyModal.id}/status`, { status: 'awaiting_approval' })
+
+      const update = (items: Task[]): Task[] => items.map((t) =>
+        t.id === showApplyModal.id ? { ...t, status: 'awaiting_approval' } : { ...t, children: t.children ? update(t.children) : undefined }
+      )
+      setTasks(update(tasks))
+
+      if (selectedTask?.id === showApplyModal.id) {
+        setSelectedTask({ ...selectedTask, status: 'awaiting_approval' })
+      }
+
+      setShowApplyModal(null)
+      setApplyReason('')
+      setApplyEvidence('')
+    } catch {
+      alert('Application failed')
+    }
+  }
+
   const renderTaskTree = (items: Task[], depth = 0) => (
     <div style={{ marginLeft: depth * 24 }}>
       {items.map((task) => {
@@ -243,6 +275,9 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
+              {selectedTask.status !== 'completed' && selectedTask.status !== 'awaiting_approval' && (
+                <button className="btn btn-primary" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowApplyModal(selectedTask); setApplyReason(''); setApplyEvidence('') }}>{t('task.applyCompletion')}</button>
+              )}
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : '') }}>{t('common.edit')}</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
@@ -436,6 +471,25 @@ export default function TasksPage() {
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setWeight(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.create')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {showApplyModal && (
+        <Modal title={t('task.applyCompletionTitle')} onClose={() => setShowApplyModal(null)}>
+          <form onSubmit={submitApplyRequest}>
+            <div className="form-group">
+              <label>{t('task.applyReason')}</label>
+              <textarea value={applyReason} onChange={(e) => setApplyReason(e.target.value)} rows={3} required />
+            </div>
+            <div className="form-group">
+              <label>{t('task.applyEvidence')}</label>
+              <input value={applyEvidence} onChange={(e) => setApplyEvidence(e.target.value)} placeholder="https://..." />
+            </div>
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => setShowApplyModal(null)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.submit')}</button>
             </div>
           </form>
         </Modal>

@@ -9,6 +9,7 @@
     "phases": "フェーズ",
     "risks": "リスク",
     "issues": "課題",
+    "applications": "申請管理",
     "logout": "ログアウト"
   },
   "common": {
@@ -108,6 +109,10 @@
     "assigneeLabel": "担当者:",
     "collaboratorsLabel": "協力者:",
     "addCollaborator": "追加...",
+    "applyCompletion": "完了申請",
+    "applyCompletionTitle": "タスク完了申請",
+    "applyReason": "申請理由・内容",
+    "applyEvidence": "エビデンス（成果物リンクなど）",
     "updateFailed": "更新に失敗しました",
     "deleteFailed": "削除に失敗しました",
     "statusChangeFailed": "状態変更に失敗しました",
@@ -174,6 +179,26 @@
     "noComments": "コメントはまだありません。",
     "writeComment": "コメントを入力...",
     "cmDeleteConfirm": "このコメントを削除しますか？"
+  },
+  "application": {
+    "title": "申請管理",
+    "noApplications": "申請はありません。",
+    "applicant": "申請者",
+    "reason": "理由・内容",
+    "evidence": "エビデンス",
+    "approve": "承認",
+    "reject": "却下",
+    "approveConfirm": "この申請を承認してもよろしいですか？",
+    "rejectTitle": "申請却下",
+    "rejectionReason": "却下理由",
+    "rejectSubmit": "却下する",
+    "phaseGate": "フェーズゲート申請",
+    "typeSubmission": "タスク完了申請",
+    "status": {
+      "pending": "保留中",
+      "approved": "承認済み",
+      "rejected": "却下済み"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",

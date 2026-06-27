@@ -9,6 +9,7 @@
     "phases": "Phases",
     "risks": "Risks",
     "issues": "Issues",
+    "applications": "Applications",
     "logout": "Logout"
   },
   "common": {
@@ -108,6 +109,10 @@
     "assigneeLabel": "Assignee:",
     "collaboratorsLabel": "Collaborators:",
     "addCollaborator": "Add...",
+    "applyCompletion": "Apply Completion",
+    "applyCompletionTitle": "Task Completion Request",
+    "applyReason": "Completion Note / Reason",
+    "applyEvidence": "Evidence (Deliverable Link, etc.)",
     "updateFailed": "Update failed",
     "deleteFailed": "Delete failed",
     "statusChangeFailed": "Status change failed",
@@ -174,6 +179,26 @@
     "noComments": "No comments yet.",
     "writeComment": "Write a comment...",
     "cmDeleteConfirm": "Delete this comment?"
+  },
+  "application": {
+    "title": "Applications",
+    "noApplications": "No applications found.",
+    "applicant": "Applicant",
+    "reason": "Reason",
+    "evidence": "Evidence",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveConfirm": "Are you sure you want to approve this application?",
+    "rejectTitle": "Reject Application",
+    "rejectionReason": "Rejection Reason",
+    "rejectSubmit": "Reject",
+    "phaseGate": "Phase Gate request",
+    "typeSubmission": "Task Submission",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
   },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",

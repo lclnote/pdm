@@ -7,6 +7,7 @@ import PhasesPage from './pages/PhasesPage'
 import TasksPage from './pages/TasksPage'
 import RisksPage from './pages/RisksPage'
 import IssuesPage from './pages/IssuesPage'
+import ApplicationsPage from './pages/ApplicationsPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="projects/:projectId/phases/:phaseId/tasks" element={<TasksPage />} />
         <Route path="projects/:projectId/risks" element={<RisksPage />} />
         <Route path="projects/:projectId/issues" element={<IssuesPage />} />
+        <Route path="projects/:projectId/applications" element={<ApplicationsPage />} />
       </Route>
     </Routes>
   )
