@@ -351,7 +351,6 @@ export default function TasksPage() {
               <span style={{ fontSize: '10px', marginLeft: '6px', verticalAlign: 'middle', color: 'var(--text-secondary)', backgroundColor: '#e8eaed', padding: '1px 6px', borderRadius: '8px' }}>{task.weight != null ? Number(task.weight).toFixed(2) : '0.00'}</span>
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
-            <span style={{ fontSize: '10px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{task.progress ?? 0}%</span>
             <select
               value={task.status || 'not_started'}
               onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
