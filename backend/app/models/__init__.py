@@ -6,6 +6,7 @@ from app.models.deliverable import Deliverable, DeliverableReview
 from app.models.risk import Risk, RiskCountermeasure
 from app.models.issue import Issue, IssueComment
 from app.models.application import Application
+from app.models.task_template import TaskTemplate
 
 __all__ = [
     "User", "Project", "ProjectMember", "Phase",
@@ -14,4 +15,5 @@ __all__ = [
     "Risk", "RiskCountermeasure",
     "Issue", "IssueComment",
     "Application",
+    "TaskTemplate",
 ]

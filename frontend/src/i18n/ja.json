@@ -271,6 +271,21 @@
       "all": "すべての担当者"
     }
   },
+  "template": {
+    "manageTemplates": "テンプレート管理・適用",
+    "saveAsTemplate": "テンプレート保存",
+    "saveTitle": "フェーズをテンプレートとして保存",
+    "managerTitle": "タスクテンプレート管理・適用",
+    "selectTemplate": "テンプレートを選択してください",
+    "noTemplates": "保存されたテンプレートはありません。",
+    "selectTargetPhase": "インポート対象フェーズ",
+    "selectTargetPhasePlaceholder": "フェーズを選択してください",
+    "apply": "テンプレートを適用",
+    "noTasksError": "テンプレート保存失敗：このフェーズにはタスクが登録されていません。",
+    "saveSuccess": "タスクテンプレートを保存しました！",
+    "applySuccess": "テンプレートタスクのインポートが完了しました！",
+    "deleteConfirm": "このタスクテンプレートを削除してもよろしいですか？"
+  },
   "warning": {
     "phaseStartBeforeProject": "開始日がプロジェクト開始前です",
     "phaseEndAfterProject": "終了日がプロジェクト終了後です",

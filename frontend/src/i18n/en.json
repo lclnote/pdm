@@ -271,6 +271,21 @@
       "all": "All Assignees"
     }
   },
+  "template": {
+    "manageTemplates": "Manage Templates",
+    "saveAsTemplate": "Save Template",
+    "saveTitle": "Save Phase as Template",
+    "managerTitle": "Task Templates Manager",
+    "selectTemplate": "Select a Template",
+    "noTemplates": "No templates saved yet.",
+    "selectTargetPhase": "Select Target Phase",
+    "selectTargetPhasePlaceholder": "Select a phase to import into",
+    "apply": "Apply Template",
+    "noTasksError": "Cannot save template: this phase has no tasks.",
+    "saveSuccess": "Task template successfully saved!",
+    "applySuccess": "Template tasks successfully imported!",
+    "deleteConfirm": "Are you sure you want to delete this task template?"
+  },
   "warning": {
     "phaseStartBeforeProject": "Start date is before project start",
     "phaseEndAfterProject": "End date is after project end",

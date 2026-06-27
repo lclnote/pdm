@@ -29,6 +29,7 @@ from app.schemas.issue import (
     IssueBase, IssueCreate, IssueUpdate, IssueResponse,
     IssueCommentCreate, IssueCommentResponse,
 )
+from app.schemas.task_template import TaskTemplateCreate, TaskTemplateResponse
 from app.schemas.dashboard import DashboardResponse
 
 __all__ = [
@@ -46,5 +47,6 @@ __all__ = [
     "RiskCountermeasureCreate", "RiskCountermeasureResponse", "RiskCountermeasureUpdate",
     "IssueBase", "IssueCreate", "IssueUpdate", "IssueResponse",
     "IssueCommentCreate", "IssueCommentResponse",
+    "TaskTemplateCreate", "TaskTemplateResponse",
     "DashboardResponse",
 ]

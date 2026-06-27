@@ -5,10 +5,20 @@ import api from '../api/client'
 import { Phase } from '../types'
 import Modal from '../components/Modal'
 
+interface TaskTemplate {
+  id: string
+  name: string
+  description?: string
+  tasks_json: any
+  created_at: string
+}
+
 export default function PhasesPage() {
   const { t } = useTranslation()
   const { projectId } = useParams()
   const navigate = useNavigate()
+  
+  // Phase states
   const [phases, setPhases] = useState<Phase[]>([])
   const [taskWarns, setTaskWarns] = useState<Record<string, number>>({})
   const [projStartDate, setProjStartDate] = useState('')
@@ -23,6 +33,15 @@ export default function PhasesPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [status, setStatus] = useState('')
+
+  // Task Template states
+  const [templates, setTemplates] = useState<TaskTemplate[]>([])
+  const [showTemplateManager, setShowTemplateManager] = useState(false)
+  const [showSaveTemplate, setShowSaveTemplate] = useState<Phase | null>(null)
+  const [tplName, setTplName] = useState('')
+  const [tplDescription, setTplDescription] = useState('')
+  const [selectedTemplateId, setSelectedTemplateId] = useState('')
+  const [targetPhaseId, setTargetPhaseId] = useState('')
 
   const phaseStatusBadge = (s: string) => {
     if (s === 'active') return 'badge-active'
@@ -93,6 +112,14 @@ export default function PhasesPage() {
       setTaskWarns({ ...warns })
     } catch (e) { console.error(e) }
   }
+
+  const loadTemplates = async () => {
+    try {
+      const res = await api.get('/task-templates')
+      setTemplates(res.data)
+    } catch {}
+  }
+
   const createPhase = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!projectId) return
@@ -156,6 +183,67 @@ export default function PhasesPage() {
     }
   }
 
+  // Task Template Actions
+  const handleOpenSaveTemplate = (ph: Phase) => {
+    setTplName(`${ph.name} Template`)
+    setTplDescription('')
+    setShowSaveTemplate(ph)
+  }
+
+  const handleSaveTemplateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!showSaveTemplate) return
+    try {
+      // 1. Fetch tasks tree inside phase
+      const res = await api.get(`/phases/${showSaveTemplate.id}/tasks`)
+      const tasksTree = res.data
+
+      if (tasksTree.length === 0) {
+        alert(t('template.noTasksError'))
+        return
+      }
+
+      // 2. Submit the template to backend
+      await api.post('/task-templates', {
+        name: tplName,
+        description: tplDescription || undefined,
+        tasks_json: tasksTree,
+      })
+
+      alert(t('template.saveSuccess'))
+      setShowSaveTemplate(null)
+    } catch {
+      alert('Failed to save template')
+    }
+  }
+
+  const handleOpenTemplateManager = () => {
+    loadTemplates()
+    setSelectedTemplateId('')
+    setTargetPhaseId('')
+    setShowTemplateManager(true)
+  }
+
+  const handleDeleteTemplate = async (id: string) => {
+    if (!confirm(t('template.deleteConfirm'))) return
+    try {
+      await api.delete(`/task-templates/${id}`)
+      setTemplates(templates.filter((t) => t.id !== id))
+      if (selectedTemplateId === id) setSelectedTemplateId('')
+    } catch { alert('Delete template failed') }
+  }
+
+  const handleApplyTemplate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedTemplateId || !targetPhaseId) return
+    try {
+      await api.post(`/phases/${targetPhaseId}/apply-template/${selectedTemplateId}`)
+      alert(t('template.applySuccess'))
+      setShowTemplateManager(false)
+      loadPage() // Reload to update warnings count if any
+    } catch { alert('Failed to apply template') }
+  }
+
   const formWarning = dateRangeWarning(startDate, endDate, projStartDate, projEndDate)
   const totalTaskWarns = Object.values(taskWarns).reduce((s, c) => s + c, 0)
 
@@ -163,7 +251,10 @@ export default function PhasesPage() {
     <div>
       <div className="page-header">
         <h1>{t('phase.title')}</h1>
-        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('phase.addPhase')}</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn" onClick={handleOpenTemplateManager}>{t('template.manageTemplates')}</button>
+          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>{t('phase.addPhase')}</button>
+        </div>
       </div>
 
       {projStartDate && projEndDate && (
@@ -215,8 +306,9 @@ export default function PhasesPage() {
                 {warn && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {warn}</div>}
                 {tCount > 0 && <div style={{ fontSize: '12px', color: '#e37400', marginTop: '4px' }}>⚠️ {t('warning.taskWarnings', {count: tCount})}</div>}
               </div>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
                 <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); setShowEdit(ph); setName(ph.name); setDescription(ph.description || ''); setStartDate(ph.start_date || ''); setEndDate(ph.end_date || ''); setStatus(ph.status) }}>{t('common.edit')}</button>
+                <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={(e) => { e.stopPropagation(); handleOpenSaveTemplate(ph) }}>{t('template.saveAsTemplate')}</button>
                 <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={(e) => { e.stopPropagation(); deletePhase(ph.id) }}>{t('common.delete')}</button>
                 {ph.status === 'active' && (
                   <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', marginLeft: 'auto' }} onClick={(e) => { e.stopPropagation(); setShowGateModal(ph); setGateReason(''); setGateEvidence('') }}>{t('phase.gateRequest')}</button>
@@ -301,6 +393,67 @@ export default function PhasesPage() {
             <div className="form-actions">
               <button type="button" className="btn" onClick={() => { setShowGateModal(null); setGateReason(''); setGateEvidence('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('phase.submitRequest')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Save Phase as Template Modal */}
+      {showSaveTemplate && (
+        <Modal title={t('template.saveTitle')} onClose={() => setShowSaveTemplate(null)}>
+          <form onSubmit={handleSaveTemplateSubmit}>
+            <div className="form-group">
+              <label>{t('common.name')} *</label>
+              <input value={tplName} onChange={(e) => setTplName(e.target.value)} required />
+            </div>
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <textarea value={tplDescription} onChange={(e) => setTplDescription(e.target.value)} rows={3} />
+            </div>
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => setShowSaveTemplate(null)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary">{t('common.save')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Template Manager / Apply Modal */}
+      {showTemplateManager && (
+        <Modal title={t('template.managerTitle')} onClose={() => setShowTemplateManager(false)}>
+          <form onSubmit={handleApplyTemplate}>
+            <div className="form-group">
+              <label>{t('template.selectTemplate')} *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '6px', padding: '8px', background: 'var(--hover-bg, #f8f9fa)', marginBottom: '12px' }}>
+                {templates.length === 0 ? (
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', textAlign: 'center', padding: '16px' }}>{t('template.noTemplates')}</div>
+                ) : templates.map((tpl) => (
+                  <div key={tpl.id} onClick={() => setSelectedTemplateId(tpl.id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: selectedTemplateId === tpl.id ? '#e8f0fe' : 'transparent', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>
+                    <div style={{ flex: 1 }}>
+                      <strong>{tpl.name}</strong>
+                      {tpl.description && <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{tpl.description}</div>}
+                    </div>
+                    <button type="button" className="btn btn-sm" style={{ color: 'var(--danger, #e53e3e)', marginLeft: '8px' }} onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(tpl.id) }}>{t('common.delete')}</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {selectedTemplateId && (
+              <div className="form-group">
+                <label>{t('template.selectTargetPhase')} *</label>
+                <select value={targetPhaseId} onChange={(e) => setTargetPhaseId(e.target.value)} required>
+                  <option value="">-- {t('template.selectTargetPhasePlaceholder')} --</option>
+                  {phases.map((ph) => (
+                    <option key={ph.id} value={ph.id}>{ph.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="form-actions">
+              <button type="button" className="btn" onClick={() => setShowTemplateManager(false)}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary" disabled={!selectedTemplateId || !targetPhaseId}>{t('template.apply')}</button>
             </div>
           </form>
         </Modal>
