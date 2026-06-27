@@ -200,6 +200,9 @@ export default function TasksPage() {
         )
         return update(prev)
       })
+      if (selectedTask?.id === taskId) {
+        setSelectedTask({ ...selectedTask, status: res.data.status })
+      }
     } catch (e: any) {
       alert(e.response?.data?.detail?.message || t('task.statusChangeFailed'))
     }
