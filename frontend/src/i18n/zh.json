@@ -136,6 +136,7 @@
     "submitSuspend": "提交中断申请",
     "updateFailed": "更新失败",
     "deleteFailed": "删除失败",
+    "createFailed": "创建失败",
     "statusChangeFailed": "状态变更失败",
     "status": {
       "unaddressed": "未处理",

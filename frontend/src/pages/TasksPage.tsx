@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 import api from '../api/client'
 import { Task, User } from '../types'
 import Modal from '../components/Modal'
@@ -36,6 +38,7 @@ export default function TasksPage() {
   const [weight, setWeight] = useState('')
   const [taskProgress, setTaskProgress] = useState('')
   const [actualHours, setActualHours] = useState('')
+  const [description, setDescription] = useState('')
   const [assigneeId, setAssigneeId] = useState('')
   const [assigneeName, setAssigneeName] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -53,7 +56,7 @@ export default function TasksPage() {
   const userRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
 
-  const statusLabel = (s: string) => t(`task.status.${s}`)
+  const statusLabel = (s: string) => t(`task.status.${s}`, s)
 
   const sortByStartDate = (items: Task[]): Task[] =>
     [...items].sort((a, b) => {
@@ -145,20 +148,22 @@ export default function TasksPage() {
     e.preventDefault()
     if (!showEdit) return
     try {
-      const payload: any = { name, assignee_id: assigneeId }
+      const payload: any = { name }
+      if (assigneeId) payload.assignee_id = assigneeId
       if (startDate) payload.start_date = startDate
       if (endDate) payload.end_date = endDate
       if (parentTaskId) payload.parent_task_id = parentTaskId
       if (weight) payload.weight = parseFloat(weight)
       if (taskProgress) payload.progress = parseInt(taskProgress, 10)
       if (actualHours) payload.actual_hours = parseFloat(actualHours)
+      if (description) payload.description = description
       if (selectedPhaseId) payload.phase_id = selectedPhaseId
       const res = await api.put(`/tasks/${showEdit.id}`, payload)
       const refresh = (items: Task[]): Task[] => items.map((t) =>
         t.id === showEdit.id ? res.data : { ...t, children: t.children ? refresh(t.children) : undefined }
       )
       setTasks(sortByStartDate(refresh(tasks)))
-      setShowEdit(null); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
+      setShowEdit(null); setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
     } catch (e: any) {
       alert(e.response?.data?.detail?.detail || t('task.updateFailed'))
     }
@@ -181,17 +186,23 @@ export default function TasksPage() {
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!phaseId) return
-    const payload: any = { name, assignee_id: assigneeId }
-    if (startDate) payload.start_date = startDate
-    if (endDate) payload.end_date = endDate
-    if (parentTaskId) payload.parent_task_id = parentTaskId
-    if (weight) payload.weight = parseFloat(weight)
-    if (taskProgress) payload.progress = parseInt(taskProgress, 10)
-    if (actualHours) payload.actual_hours = parseFloat(actualHours)
-    const res = await api.post(`/phases/${phaseId}/tasks`, payload)
-    setTasks(sortByStartDate([...tasks, res.data]))
-    setShowCreate(false)
-    setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
+    try {
+      const payload: any = { name }
+      if (assigneeId) payload.assignee_id = assigneeId
+      if (startDate) payload.start_date = startDate
+      if (endDate) payload.end_date = endDate
+      if (parentTaskId) payload.parent_task_id = parentTaskId
+      if (weight) payload.weight = parseFloat(weight)
+      if (taskProgress) payload.progress = parseInt(taskProgress, 10)
+      if (actualHours) payload.actual_hours = parseFloat(actualHours)
+      if (description) payload.description = description
+      const res = await api.post(`/phases/${phaseId}/tasks`, payload)
+      setTasks(sortByStartDate([...tasks, res.data]))
+      setShowCreate(false)
+      setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('')
+    } catch (e: any) {
+      alert(e.response?.data?.detail?.detail || e.response?.data?.detail || t('task.createFailed'))
+    }
   }
 
   const updateStatus = async (taskId: string, status: string) => {
@@ -267,7 +278,7 @@ export default function TasksPage() {
               {warn && <span title={t(warn)} style={{ marginLeft: '4px', cursor: 'help' }}>⚠️</span>}
             </span>
             <select
-              value={task.status || 'not_started'}
+              value={task.status || 'unaddressed'}
               onChange={(e) => { e.stopPropagation(); updateStatus(task.id, e.target.value) }}
               onClick={(e) => e.stopPropagation()}
               className={`badge ${task.status ? STATUS_BADGE[task.status] : 'badge-pending'}`}
@@ -319,7 +330,7 @@ export default function TasksPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <h3 style={{ margin: 0 }}>{selectedTask.name}{detailWarn && <span title={t(detailWarn)} style={{ marginLeft: '6px', cursor: 'help' }}>⚠️</span>}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setWeight(String(selectedTask.weight ?? '')); setTaskProgress(String(selectedTask.progress ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : ''); setSelectedPhaseId(selectedTask.phase_id || '') }}>{t('common.edit')}</button>
+              <button className="btn" style={{ fontSize: '12px', padding: '4px 8px' }} onClick={() => { setShowEdit(selectedTask); setName(selectedTask.name); setDescription(selectedTask.description || ''); setWeight(String(selectedTask.weight ?? '')); setTaskProgress(String(selectedTask.progress ?? '')); setActualHours(String(selectedTask.actual_hours ?? '')); setAssigneeId(selectedTask.assignee_id); setAssigneeName(userMap[selectedTask.assignee_id] || ''); setStartDate(selectedTask.start_date || ''); setEndDate(selectedTask.end_date || ''); setParentTaskId(selectedTask.parent_task_id || ''); setParentTaskName(selectedTask.parent_task_id ? (taskMap[selectedTask.parent_task_id] || '') : ''); setSelectedPhaseId(selectedTask.phase_id || '') }}>{t('common.edit')}</button>
               <button className="btn" style={{ fontSize: '12px', padding: '4px 8px', color: 'var(--danger, #e53e3e)' }} onClick={() => deleteTask(selectedTask.id)}>{t('common.delete')}</button>
             </div>
           </div>
@@ -332,6 +343,10 @@ export default function TasksPage() {
             <div><strong>{t('task.actualHoursLabel')}</strong> {selectedTask.actual_hours ?? '-'}</div>
             <div><strong>{t('task.assigneeLabel')}</strong> {userMap[selectedTask.assignee_id] || selectedTask.assignee_id}</div>
           </div>
+          {selectedTask.description && <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '12px', fontSize: '14px' }}>
+            <strong>{t('common.description')}</strong>
+            <div style={{ marginTop: '4px', padding: '8px', background: 'var(--hover-bg, #f8f9fa)', borderRadius: '4px' }} dangerouslySetInnerHTML={{ __html: selectedTask.description }} />
+          </div>}
           <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '12px', fontSize: '14px' }}>
             <strong>{t('task.collaboratorsLabel')}</strong>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
@@ -406,15 +421,19 @@ export default function TasksPage() {
       )})()}
 
       {showEdit && (
-        <Modal title={t('task.editTask')} onClose={() => { setShowEdit(null); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.editTask')} onClose={() => { setShowEdit(null); setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={updateTask}>
             <div className="form-group">
               <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <ReactQuill value={description} onChange={setDescription} theme="snow" />
+            </div>
             <div className="form-group" style={{ position: 'relative' }} ref={userRef}>
-              <label>{t('task.assigneeRequired')}</label>
-              <input value={assigneeName} onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }} onFocus={() => setShowUserDropdown(true)} placeholder={t('task.searchUser')} required />
+              <label>{t('task.assigneeLabel')}</label>
+              <input value={assigneeName} onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }} onFocus={() => setShowUserDropdown(true)} placeholder={t('task.searchUser')} />
               {showUserDropdown && (
                 <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--card-bg, #fff)', borderRadius: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
                   {filteredUsers.length === 0 ? (
@@ -476,7 +495,7 @@ export default function TasksPage() {
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName(''); setSelectedPhaseId('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowEdit(null); setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName(''); setSelectedPhaseId('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.save')}</button>
             </div>
           </form>
@@ -484,20 +503,23 @@ export default function TasksPage() {
       )}
 
       {showCreate && (
-        <Modal title={t('task.createTask')} onClose={() => { setShowCreate(false); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
+        <Modal title={t('task.createTask')} onClose={() => { setShowCreate(false); setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>
           <form onSubmit={createTask}>
             <div className="form-group">
               <label>{t('common.name')}</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
+            <div className="form-group">
+              <label>{t('common.description')}</label>
+              <ReactQuill value={description} onChange={setDescription} theme="snow" />
+            </div>
             <div className="form-group" ref={userRef} style={{ position: 'relative' }}>
-              <label>{t('task.assigneeRequired')}</label>
+              <label>{t('task.assigneeLabel')}</label>
               <input
                 value={assigneeName}
                 onChange={(e) => { setAssigneeName(e.target.value); setAssigneeId(''); setShowUserDropdown(true) }}
                 onFocus={() => setShowUserDropdown(true)}
                 placeholder={t('task.searchUser')}
-                required
               />
               {showUserDropdown && (
                 <div style={{
@@ -563,7 +585,7 @@ export default function TasksPage() {
             </div>
             {formWarning && <div style={{ fontSize: '13px', color: '#e37400', marginBottom: '12px' }}>⚠️ {t(formWarning)}</div>}
             <div className="form-actions">
-              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
+              <button type="button" className="btn" onClick={() => { setShowCreate(false); setName(''); setDescription(''); setWeight(''); setTaskProgress(''); setActualHours(''); setAssigneeId(''); setAssigneeName(''); setStartDate(''); setEndDate(''); setParentTaskId(''); setParentTaskName('') }}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary">{t('common.create')}</button>
             </div>
           </form>

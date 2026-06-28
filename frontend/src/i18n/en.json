@@ -136,6 +136,7 @@
     "submitSuspend": "Submit Suspend Request",
     "updateFailed": "Update failed",
     "deleteFailed": "Delete failed",
+    "createFailed": "Create failed",
     "statusChangeFailed": "Status change failed",
     "status": {
       "unaddressed": "Unaddressed",

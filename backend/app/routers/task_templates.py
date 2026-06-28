@@ -81,7 +81,7 @@ async def apply_template(
                 task_level=t_data.get("task_level", "root" if not parent_id else "subtask"),
                 weight=t_data.get("weight", 1.0),
                 estimated_hours=t_data.get("estimated_hours"),
-                status="not_started",
+                status="unaddressed",
                 assignee_id=current_user.id,
             )
             db.add(task)

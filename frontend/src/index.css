@@ -443,3 +443,10 @@ th {
     font-size: 11px !important;
   }
 }
+
+.ql-editor {
+  min-height: 200px;
+}
+.ql-container {
+  font-size: 14px;
+}

@@ -136,6 +136,7 @@
     "submitSuspend": "中断申請を送信",
     "updateFailed": "更新に失敗しました",
     "deleteFailed": "削除に失敗しました",
+    "createFailed": "作成に失敗しました",
     "statusChangeFailed": "状態変更に失敗しました",
     "status": {
       "unaddressed": "未対応",

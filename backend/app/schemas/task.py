@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class TaskBase(BaseModel):
     name: str
     description: Optional[str] = None
-    assignee_id: UUID
+    assignee_id: Optional[UUID] = None
     estimated_hours: float = 0
     weight: float = 1.0
     progress: int = 0
